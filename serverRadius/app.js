@@ -45,23 +45,19 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(cedula, 10);
 
-    // Registra en las tablas `persona` y `radcheck`
     await prisma.persona.create({
       data: {
-        cedula,
-        nombres,
-        apellidos,
-        genero,
-        edad,
+        cedula: cedula,
+        nombres: nombres,
+        apellidos: apellidos,
+        genero: genero,
+        edad: edad,
         radcheck: {
           create: {
-            username: cedula,
-            password: hashedPassword,
-            attribute: 'Cleartext-Password',
-            op: ':=',
-            value: hashedPassword, // Por compatibilidad
+            attribute: "Cleartext-Password",
+            op: ":=",
+            value: await bcrypt.hash(cedula, 10), // Contraseña encriptada
           },
         },
       },
@@ -92,7 +88,7 @@ app.post('/login', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.value);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }

@@ -674,7 +674,7 @@ model wimax {
 }
 
 model persona {
-  id        String    @id @db.Char(36)
+  id        String    @id @default(dbgenerated("(uuid())")) @db.Char(36)
   cedula    String    @unique(map: "cedula") @db.VarChar(64)
   nombres   String    @db.VarChar(100)
   apellidos String    @db.VarChar(100)
