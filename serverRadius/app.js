@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
 // Configuración de CORS
-const allowedOrigins = ['http://localhost:5001']; // Cambia por tus dominios permitidos
+const allowedOrigins = ['http://192.168.4.136:5001']; // Cambia por tus dominios permitidos
 app.use(cors({ origin: allowedOrigins }));
 
 // Middleware
