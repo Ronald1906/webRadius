@@ -1,0 +1,690 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model batch_history {
+  id                Int       @id @default(autoincrement())
+  batch_name        String?   @db.VarChar(64)
+  batch_description String?   @db.VarChar(256)
+  hotspot_id        Int?      @default(0)
+  batch_status      String    @default("Pending") @db.VarChar(128)
+  creationdate      DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby        String?   @db.VarChar(128)
+  updatedate        DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby          String?   @db.VarChar(128)
+
+  @@index([batch_name], map: "batch_name")
+}
+
+model billing_history {
+  id                     Int       @id @default(autoincrement()) @db.UnsignedInt
+  username               String?   @db.VarChar(128)
+  planId                 Int?
+  billAmount             String?   @db.VarChar(200)
+  billAction             String    @default("Unavailable") @db.VarChar(128)
+  billPerformer          String?   @db.VarChar(200)
+  billReason             String?   @db.VarChar(200)
+  paymentmethod          String?   @db.VarChar(200)
+  cash                   String?   @db.VarChar(200)
+  creditcardname         String?   @db.VarChar(200)
+  creditcardnumber       String?   @db.VarChar(200)
+  creditcardverification String?   @db.VarChar(200)
+  creditcardtype         String?   @db.VarChar(200)
+  creditcardexp          String?   @db.VarChar(200)
+  coupon                 String?   @db.VarChar(200)
+  discount               String?   @db.VarChar(200)
+  notes                  String?   @db.VarChar(200)
+  creationdate           DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby             String?   @db.VarChar(128)
+  updatedate             DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby               String?   @db.VarChar(128)
+
+  @@index([username], map: "username")
+}
+
+model billing_merchant {
+  id                         Int      @id @default(autoincrement())
+  username                   String   @default("") @db.VarChar(128)
+  password                   String   @default("") @db.VarChar(128)
+  mac                        String   @default("") @db.VarChar(200)
+  pin                        String   @default("") @db.VarChar(200)
+  txnId                      String   @default("") @db.VarChar(200)
+  planName                   String   @default("") @db.VarChar(128)
+  planId                     Int
+  quantity                   String   @default("") @db.VarChar(200)
+  business_email             String   @default("") @db.VarChar(200)
+  business_id                String   @default("") @db.VarChar(200)
+  txn_type                   String   @default("") @db.VarChar(200)
+  txn_id                     String   @default("") @db.VarChar(200)
+  payment_type               String   @default("") @db.VarChar(200)
+  payment_tax                String   @default("") @db.VarChar(200)
+  payment_cost               String   @default("") @db.VarChar(200)
+  payment_fee                String   @default("") @db.VarChar(200)
+  payment_total              String   @default("") @db.VarChar(200)
+  payment_currency           String   @default("") @db.VarChar(200)
+  first_name                 String   @default("") @db.VarChar(200)
+  last_name                  String   @default("") @db.VarChar(200)
+  payer_email                String   @default("") @db.VarChar(200)
+  payer_address_name         String   @default("") @db.VarChar(200)
+  payer_address_street       String   @default("") @db.VarChar(200)
+  payer_address_country      String   @default("") @db.VarChar(200)
+  payer_address_country_code String   @default("") @db.VarChar(200)
+  payer_address_city         String   @default("") @db.VarChar(200)
+  payer_address_state        String   @default("") @db.VarChar(200)
+  payer_address_zip          String   @default("") @db.VarChar(200)
+  payment_date               DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  payment_status             String   @default("") @db.VarChar(200)
+  pending_reason             String   @default("") @db.VarChar(200)
+  reason_code                String   @default("") @db.VarChar(200)
+  receipt_ID                 String   @default("") @db.VarChar(200)
+  payment_address_status     String   @default("") @db.VarChar(200)
+  vendor_type                String   @default("") @db.VarChar(200)
+  payer_status               String   @default("") @db.VarChar(200)
+
+  @@index([username], map: "username")
+}
+
+model billing_paypal {
+  id                     Int       @id @default(autoincrement())
+  username               String?   @db.VarChar(128)
+  password               String?   @db.VarChar(128)
+  mac                    String?   @db.VarChar(200)
+  pin                    String?   @db.VarChar(200)
+  txnId                  String?   @db.VarChar(200)
+  planName               String?   @db.VarChar(128)
+  planId                 String?   @db.VarChar(200)
+  quantity               String?   @db.VarChar(200)
+  receiver_email         String?   @db.VarChar(200)
+  business               String?   @db.VarChar(200)
+  tax                    String?   @db.VarChar(200)
+  mc_gross               String?   @db.VarChar(200)
+  mc_fee                 String?   @db.VarChar(200)
+  mc_currency            String?   @db.VarChar(200)
+  first_name             String?   @db.VarChar(200)
+  last_name              String?   @db.VarChar(200)
+  payer_email            String?   @db.VarChar(200)
+  address_name           String?   @db.VarChar(200)
+  address_street         String?   @db.VarChar(200)
+  address_country        String?   @db.VarChar(200)
+  address_country_code   String?   @db.VarChar(200)
+  address_city           String?   @db.VarChar(200)
+  address_state          String?   @db.VarChar(200)
+  address_zip            String?   @db.VarChar(200)
+  payment_date           DateTime? @db.DateTime(0)
+  payment_status         String?   @db.VarChar(200)
+  payment_address_status String?   @db.VarChar(200)
+  payer_status           String?   @db.VarChar(200)
+
+  @@index([username], map: "username")
+}
+
+model billing_plans {
+  id                           Int       @id @default(autoincrement())
+  planName                     String?   @db.VarChar(128)
+  planId                       String?   @db.VarChar(128)
+  planType                     String?   @db.VarChar(128)
+  planTimeBank                 String?   @db.VarChar(128)
+  planTimeType                 String?   @db.VarChar(128)
+  planTimeRefillCost           String?   @db.VarChar(128)
+  planBandwidthUp              String?   @db.VarChar(128)
+  planBandwidthDown            String?   @db.VarChar(128)
+  planTrafficTotal             String?   @db.VarChar(128)
+  planTrafficUp                String?   @db.VarChar(128)
+  planTrafficDown              String?   @db.VarChar(128)
+  planTrafficRefillCost        String?   @db.VarChar(128)
+  planRecurring                String?   @db.VarChar(128)
+  planRecurringPeriod          String?   @db.VarChar(128)
+  planRecurringBillingSchedule String    @default("Fixed") @db.VarChar(128)
+  planCost                     String?   @db.VarChar(128)
+  planSetupCost                String?   @db.VarChar(128)
+  planTax                      String?   @db.VarChar(128)
+  planCurrency                 String?   @db.VarChar(128)
+  planGroup                    String?   @db.VarChar(128)
+  planActive                   String    @default("yes") @db.VarChar(32)
+  creationdate                 DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby                   String?   @db.VarChar(128)
+  updatedate                   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby                     String?   @db.VarChar(128)
+
+  @@index([planName], map: "planName")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model billing_plans_profiles {
+  id           Int     @id @default(autoincrement())
+  plan_name    String  @db.VarChar(128)
+  profile_name String? @db.VarChar(256)
+}
+
+model billing_rates {
+  id           Int       @id @default(autoincrement()) @db.UnsignedInt
+  rateName     String    @default("") @db.VarChar(128)
+  rateType     String    @default("") @db.VarChar(128)
+  rateCost     Int       @default(0)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+
+  @@index([rateName], map: "rateName")
+}
+
+model cui {
+  clientipaddress  String   @default("") @db.VarChar(46)
+  callingstationid String   @default("") @db.VarChar(50)
+  username         String   @default("") @db.VarChar(64)
+  cui              String   @default("") @db.VarChar(32)
+  creationdate     DateTime @default(now()) @db.Timestamp(0)
+  lastaccounting   DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.Timestamp(0)
+
+  @@id([username, clientipaddress, callingstationid])
+}
+
+model dictionary {
+  id                 Int     @id @default(autoincrement())
+  Type               String? @db.VarChar(30)
+  Attribute          String? @db.VarChar(64)
+  Value              String? @db.VarChar(64)
+  Format             String? @db.VarChar(20)
+  Vendor             String? @db.VarChar(32)
+  RecommendedOP      String? @db.VarChar(32)
+  RecommendedTable   String? @db.VarChar(32)
+  RecommendedHelper  String? @db.VarChar(32)
+  RecommendedTooltip String? @db.VarChar(512)
+}
+
+model hotspots {
+  id             BigInt    @id @default(autoincrement())
+  name           String?   @db.VarChar(200)
+  mac            String?   @db.VarChar(200)
+  geocode        String?   @db.VarChar(200)
+  owner          String?   @db.VarChar(200)
+  email_owner    String?   @db.VarChar(200)
+  manager        String?   @db.VarChar(200)
+  email_manager  String?   @db.VarChar(200)
+  address        String?   @db.VarChar(200)
+  company        String?   @db.VarChar(200)
+  phone1         String?   @db.VarChar(200)
+  phone2         String?   @db.VarChar(200)
+  type           String?   @db.VarChar(200)
+  companywebsite String?   @db.VarChar(200)
+  companyemail   String?   @db.VarChar(200)
+  companycontact String?   @db.VarChar(200)
+  companyphone   String?   @db.VarChar(200)
+  creationdate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby     String?   @db.VarChar(128)
+  updatedate     DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby       String?   @db.VarChar(128)
+
+  @@index([mac], map: "mac")
+  @@index([name], map: "name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invoice {
+  id           Int       @id @default(autoincrement())
+  user_id      Int?
+  batch_id     Int?
+  date         DateTime  @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  status_id    Int       @default(1)
+  type_id      Int       @default(1)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invoice_items {
+  id           Int       @id @default(autoincrement())
+  invoice_id   Int
+  plan_id      Int?
+  amount       Decimal   @default(0.00) @db.Decimal(10, 2)
+  tax_amount   Decimal   @default(0.00) @db.Decimal(10, 2)
+  total        Decimal   @default(0.00) @db.Decimal(10, 2)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invoice_status {
+  id           Int       @id @default(autoincrement())
+  value        String    @default("") @db.VarChar(32)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model invoice_type {
+  id           Int       @id @default(autoincrement())
+  value        String    @default("") @db.VarChar(32)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+model messages {
+  id          Int           @id @default(autoincrement())
+  type        messages_type
+  content     String        @db.LongText
+  created_on  DateTime?     @db.DateTime(0)
+  created_by  String?       @db.VarChar(32)
+  modified_on DateTime?     @db.DateTime(0)
+  modified_by String?       @db.VarChar(32)
+}
+
+model nas {
+  id          Int     @id @default(autoincrement())
+  nasname     String  @db.VarChar(128)
+  shortname   String? @db.VarChar(32)
+  type        String? @default("other") @db.VarChar(30)
+  ports       Int?
+  secret      String  @default("secret") @db.VarChar(60)
+  server      String? @db.VarChar(64)
+  community   String? @db.VarChar(50)
+  description String? @default("RADIUS Client") @db.VarChar(200)
+
+  @@index([nasname], map: "nasname")
+}
+
+model nasreload {
+  nasipaddress String   @id @db.VarChar(15)
+  reloadtime   DateTime @db.DateTime(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model node {
+  id                Int      @id @default(autoincrement())
+  time              DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  netid             Int
+  name              String   @db.VarChar(100)
+  description       String   @db.VarChar(100)
+  latitude          String   @db.VarChar(20)
+  longitude         String   @db.VarChar(20)
+  owner_name        String   @db.VarChar(50)
+  owner_email       String   @db.VarChar(50)
+  owner_phone       String   @db.VarChar(25)
+  owner_address     String   @db.VarChar(100)
+  approval_status   String   @db.VarChar(1)
+  ip                String   @db.VarChar(20)
+  mac               String   @unique(map: "mac") @db.VarChar(20)
+  uptime            String   @db.VarChar(100)
+  robin             String   @db.VarChar(20)
+  batman            String   @db.VarChar(20)
+  memfree           String   @db.VarChar(20)
+  nbs               String   @db.MediumText
+  gateway           String   @db.VarChar(20)
+  gw_qual           String   @map("gw-qual") @db.VarChar(20)
+  routes            String   @db.MediumText
+  users             String   @db.Char(3)
+  kbdown            String   @db.VarChar(20)
+  kbup              String   @db.VarChar(20)
+  hops              String   @db.VarChar(3)
+  rank              String   @db.VarChar(3)
+  ssid              String   @db.VarChar(20)
+  pssid             String   @db.VarChar(20)
+  gateway_bit       Boolean
+  memlow            String   @db.VarChar(20)
+  usershi           String   @db.Char(3)
+  cpu               Float    @default(0) @db.Float
+  wan_iface         String?  @db.VarChar(128)
+  wan_ip            String?  @db.VarChar(128)
+  wan_mac           String?  @db.VarChar(128)
+  wan_gateway       String?  @db.VarChar(128)
+  wifi_iface        String?  @db.VarChar(128)
+  wifi_ip           String?  @db.VarChar(128)
+  wifi_mac          String?  @db.VarChar(128)
+  wifi_ssid         String?  @db.VarChar(128)
+  wifi_key          String?  @db.VarChar(128)
+  wifi_channel      String?  @db.VarChar(128)
+  lan_iface         String?  @db.VarChar(128)
+  lan_mac           String?  @db.VarChar(128)
+  lan_ip            String?  @db.VarChar(128)
+  wan_bup           String?  @db.VarChar(128)
+  wan_bdown         String?  @db.VarChar(128)
+  firmware          String?  @db.VarChar(128)
+  firmware_revision String?  @db.VarChar(128)
+}
+
+model operators {
+  id           Int       @id @default(autoincrement())
+  username     String    @db.VarChar(32)
+  password     String    @db.VarChar(32)
+  firstname    String    @db.VarChar(32)
+  lastname     String    @db.VarChar(32)
+  title        String    @db.VarChar(32)
+  department   String    @db.VarChar(32)
+  company      String    @db.VarChar(32)
+  phone1       String    @db.VarChar(32)
+  phone2       String    @db.VarChar(32)
+  email1       String    @db.VarChar(32)
+  email2       String    @db.VarChar(32)
+  messenger1   String    @db.VarChar(32)
+  messenger2   String    @db.VarChar(32)
+  notes        String    @db.VarChar(128)
+  lastlogin    DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+
+  @@index([username], map: "username")
+}
+
+model operators_acl {
+  id          Int    @id @default(autoincrement())
+  operator_id Int
+  file        String @db.VarChar(128)
+  access      Int    @default(0) @db.TinyInt
+}
+
+model operators_acl_files {
+  id       Int    @id @default(autoincrement())
+  file     String @db.VarChar(128)
+  category String @db.VarChar(128)
+  section  String @db.VarChar(128)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model payment {
+  id           Int       @id @default(autoincrement())
+  invoice_id   Int
+  amount       Decimal   @db.Decimal(10, 2)
+  date         DateTime  @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  type_id      Int       @default(1)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model payment_type {
+  id           Int       @id @default(autoincrement())
+  value        String    @default("") @db.VarChar(32)
+  notes        String    @db.VarChar(128)
+  creationdate DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+model proxys {
+  id               BigInt    @id @default(autoincrement())
+  proxyname        String?   @db.VarChar(128)
+  retry_delay      Int?
+  retry_count      Int?
+  dead_time        Int?
+  default_fallback Int?
+  creationdate     DateTime? @db.DateTime(0)
+  creationby       String?   @db.VarChar(128)
+  updatedate       DateTime? @db.DateTime(0)
+  updateby         String?   @db.VarChar(128)
+}
+
+model radacct {
+  radacctid           BigInt    @id @default(autoincrement())
+  acctsessionid       String    @default("") @db.VarChar(64)
+  acctuniqueid        String    @unique(map: "acctuniqueid") @default("") @db.VarChar(32)
+  username            String    @default("") @db.VarChar(64)
+  realm               String?   @default("") @db.VarChar(64)
+  nasipaddress        String    @default("") @db.VarChar(15)
+  nasportid           String?   @db.VarChar(32)
+  nasporttype         String?   @db.VarChar(32)
+  acctstarttime       DateTime? @db.DateTime(0)
+  acctupdatetime      DateTime? @db.DateTime(0)
+  acctstoptime        DateTime? @db.DateTime(0)
+  acctinterval        Int?
+  acctsessiontime     Int?      @db.UnsignedInt
+  acctauthentic       String?   @db.VarChar(32)
+  connectinfo_start   String?   @db.VarChar(128)
+  connectinfo_stop    String?   @db.VarChar(128)
+  acctinputoctets     BigInt?
+  acctoutputoctets    BigInt?
+  calledstationid     String    @default("") @db.VarChar(50)
+  callingstationid    String    @default("") @db.VarChar(50)
+  acctterminatecause  String    @default("") @db.VarChar(32)
+  servicetype         String?   @db.VarChar(32)
+  framedprotocol      String?   @db.VarChar(32)
+  framedipaddress     String    @default("") @db.VarChar(15)
+  framedipv6address   String    @default("") @db.VarChar(45)
+  framedipv6prefix    String    @default("") @db.VarChar(45)
+  framedinterfaceid   String    @default("") @db.VarChar(44)
+  delegatedipv6prefix String    @default("") @db.VarChar(45)
+  class               String?   @db.VarChar(64)
+
+  @@index([acctinterval], map: "acctinterval")
+  @@index([acctsessionid], map: "acctsessionid")
+  @@index([acctsessiontime], map: "acctsessiontime")
+  @@index([acctstarttime], map: "acctstarttime")
+  @@index([acctstoptime], map: "acctstoptime")
+  @@index([class], map: "class")
+  @@index([delegatedipv6prefix], map: "delegatedipv6prefix")
+  @@index([framedinterfaceid], map: "framedinterfaceid")
+  @@index([framedipaddress], map: "framedipaddress")
+  @@index([framedipv6address], map: "framedipv6address")
+  @@index([framedipv6prefix], map: "framedipv6prefix")
+  @@index([nasipaddress], map: "nasipaddress")
+  @@index([username], map: "username")
+}
+
+model radcheck {
+  id        Int     @id @default(autoincrement()) @db.UnsignedInt
+  username  String  @unique(map: "unique_username") @default("") @db.VarChar(64)
+  attribute String  @default("") @db.VarChar(64)
+  op        String  @default("==") @db.Char(2)
+  value     String  @default("") @db.VarChar(253)
+  persona   persona @relation(fields: [username], references: [cedula], onDelete: Cascade, onUpdate: Restrict, map: "fk_persona")
+
+  @@index([username(length: 32)], map: "username")
+}
+
+model radgroupcheck {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  groupname String @default("") @db.VarChar(64)
+  attribute String @default("") @db.VarChar(64)
+  op        String @default("==") @db.Char(2)
+  value     String @default("") @db.VarChar(253)
+
+  @@index([groupname(length: 32)], map: "groupname")
+}
+
+model radgroupreply {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  groupname String @default("") @db.VarChar(64)
+  attribute String @default("") @db.VarChar(64)
+  op        String @default("=") @db.Char(2)
+  value     String @default("") @db.VarChar(253)
+
+  @@index([groupname(length: 32)], map: "groupname")
+}
+
+model radhuntgroup {
+  id           Int     @id @default(autoincrement()) @db.UnsignedInt
+  groupname    String  @default("") @db.VarChar(64)
+  nasipaddress String  @default("") @db.VarChar(15)
+  nasportid    String? @db.VarChar(15)
+
+  @@index([nasipaddress], map: "nasipaddress")
+}
+
+model radippool {
+  id               Int      @id @default(autoincrement()) @db.UnsignedInt
+  pool_name        String   @db.VarChar(30)
+  framedipaddress  String   @default("") @db.VarChar(15)
+  nasipaddress     String   @default("") @db.VarChar(15)
+  calledstationid  String   @default("") @db.VarChar(30)
+  callingstationid String   @default("") @db.VarChar(30)
+  expiry_time      DateTime @default(now()) @db.DateTime(0)
+  username         String   @default("") @db.VarChar(64)
+  pool_key         String   @default("") @db.VarChar(30)
+
+  @@index([framedipaddress], map: "framedipaddress")
+  @@index([nasipaddress, pool_key, framedipaddress], map: "radippool_nasip_poolkey_ipaddress")
+  @@index([pool_name, expiry_time], map: "radippool_poolname_expire")
+}
+
+model radpostauth {
+  id       Int      @id @default(autoincrement())
+  username String   @default("") @db.VarChar(64)
+  pass     String   @default("") @db.VarChar(64)
+  reply    String   @default("") @db.VarChar(32)
+  authdate DateTime @default(now()) @db.Timestamp(6)
+  class    String?  @db.VarChar(64)
+
+  @@index([class], map: "class")
+  @@index([username], map: "username")
+}
+
+model radreply {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  username  String @default("") @db.VarChar(64)
+  attribute String @default("") @db.VarChar(64)
+  op        String @default("=") @db.Char(2)
+  value     String @default("") @db.VarChar(253)
+
+  @@index([username(length: 32)], map: "username")
+}
+
+model radusergroup {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  username  String @default("") @db.VarChar(64)
+  groupname String @default("") @db.VarChar(64)
+  priority  Int    @default(1)
+
+  @@index([username(length: 32)], map: "username")
+}
+
+model realms {
+  id           BigInt    @id @default(autoincrement())
+  realmname    String?   @db.VarChar(128)
+  type         String?   @db.VarChar(32)
+  authhost     String?   @db.VarChar(256)
+  accthost     String?   @db.VarChar(256)
+  secret       String?   @db.VarChar(128)
+  ldflag       String?   @db.VarChar(64)
+  nostrip      Int?
+  hints        Int?
+  notrealm     Int?
+  creationdate DateTime? @db.DateTime(0)
+  creationby   String?   @db.VarChar(128)
+  updatedate   DateTime? @db.DateTime(0)
+  updateby     String?   @db.VarChar(128)
+}
+
+model userbillinfo {
+  id                     Int       @id @default(autoincrement()) @db.UnsignedInt
+  username               String?   @db.VarChar(128)
+  planName               String?   @db.VarChar(128)
+  hotspot_id             Int?
+  hotspotlocation        String?   @db.VarChar(32)
+  contactperson          String?   @db.VarChar(200)
+  company                String?   @db.VarChar(200)
+  email                  String?   @db.VarChar(200)
+  phone                  String?   @db.VarChar(200)
+  address                String?   @db.VarChar(200)
+  city                   String?   @db.VarChar(200)
+  state                  String?   @db.VarChar(200)
+  country                String?   @db.VarChar(100)
+  zip                    String?   @db.VarChar(200)
+  paymentmethod          String?   @db.VarChar(200)
+  cash                   String?   @db.VarChar(200)
+  creditcardname         String?   @db.VarChar(200)
+  creditcardnumber       String?   @db.VarChar(200)
+  creditcardverification String?   @db.VarChar(200)
+  creditcardtype         String?   @db.VarChar(200)
+  creditcardexp          String?   @db.VarChar(200)
+  notes                  String?   @db.VarChar(200)
+  changeuserbillinfo     String?   @db.VarChar(128)
+  lead                   String?   @db.VarChar(200)
+  coupon                 String?   @db.VarChar(200)
+  ordertaker             String?   @db.VarChar(200)
+  billstatus             String?   @db.VarChar(200)
+  lastbill               DateTime  @default(dbgenerated("('0000-00-00')")) @db.Date
+  nextbill               DateTime  @default(dbgenerated("('0000-00-00')")) @db.Date
+  nextinvoicedue         Int?
+  billdue                Int?
+  postalinvoice          String?   @db.VarChar(8)
+  faxinvoice             String?   @db.VarChar(8)
+  emailinvoice           String?   @db.VarChar(8)
+  batch_id               Int?
+  creationdate           DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby             String?   @db.VarChar(128)
+  updatedate             DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby               String?   @db.VarChar(128)
+
+  @@index([planName], map: "planname")
+  @@index([username], map: "username")
+}
+
+model userinfo {
+  id                  Int       @id @default(autoincrement()) @db.UnsignedInt
+  username            String?   @db.VarChar(128)
+  firstname           String?   @db.VarChar(200)
+  lastname            String?   @db.VarChar(200)
+  email               String?   @db.VarChar(200)
+  department          String?   @db.VarChar(200)
+  company             String?   @db.VarChar(200)
+  workphone           String?   @db.VarChar(200)
+  homephone           String?   @db.VarChar(200)
+  mobilephone         String?   @db.VarChar(200)
+  address             String?   @db.VarChar(200)
+  city                String?   @db.VarChar(200)
+  state               String?   @db.VarChar(200)
+  country             String?   @db.VarChar(100)
+  zip                 String?   @db.VarChar(200)
+  notes               String?   @db.VarChar(200)
+  changeuserinfo      String?   @db.VarChar(128)
+  portalloginpassword String?   @default("") @db.VarChar(128)
+  enableportallogin   Int?      @default(0)
+  creationdate        DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  creationby          String?   @db.VarChar(128)
+  updatedate          DateTime? @default(dbgenerated("('0000-00-00 00:00:00')")) @db.DateTime(0)
+  updateby            String?   @db.VarChar(128)
+
+  @@index([username], map: "username")
+}
+
+model wimax {
+  id       Int      @id @default(autoincrement())
+  username String   @default("") @db.VarChar(64)
+  authdate DateTime @db.Timestamp(0)
+  spi      String   @default("") @db.VarChar(16)
+  mipkey   String   @default("") @db.VarChar(400)
+  lifetime Int?
+
+  @@index([spi], map: "spi")
+  @@index([username], map: "username")
+}
+
+model persona {
+  id        String    @id @db.Char(36)
+  cedula    String    @unique(map: "cedula") @db.VarChar(64)
+  nombres   String    @db.VarChar(100)
+  apellidos String    @db.VarChar(100)
+  genero    String    @db.Char(1)
+  edad      Int
+  radcheck  radcheck?
+}
+
+enum messages_type {
+  login
+  support
+  dashboard
+}
