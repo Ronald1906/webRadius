@@ -17,22 +17,21 @@ app.use(cors({ origin: allowedOrigins }));
 // Middleware
 app.use(express.json());
 
-// Función para notificar al servidor RADIUS
 const notifyRadius = (username) => {
   const packet = radius.encode({
-    code: 'Access-Accept',
-    secret: process.env.RADIUS_SECRET,
-    attributes: [['User-Name', username]],
+      code: 'Access-Accept',
+      secret: process.env.RADIUS_SECRET,
+      attributes: [['User-Name', username]],
   });
 
   const client = dgram.createSocket('udp4');
   client.send(packet, 0, packet.length, process.env.RADIUS_PORT, process.env.RADIUS_SERVER, (err) => {
-    if (err) {
-      console.error('Error al notificar a RADIUS:', err);
-    } else {
-      console.log(`Notificación enviada a RADIUS para el usuario: ${username}`);
-    }
-    client.close();
+      if (err) {
+          console.error('Error al notificar al servidor RADIUS:', err);
+      } else {
+          console.log(`Notificación enviada al servidor RADIUS para el usuario: ${username}`);
+      }
+      client.close();
   });
 };
 
@@ -74,34 +73,25 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Usuario y contraseña son obligatorios' });
-  }
-
   try {
-    const user = await prisma.radcheck.findUnique({
-      where: { username },
-      include: { persona: true },
-    });
+      // Validar credenciales
+      const user = await prisma.radcheck.findUnique({ where: { username } });
+      if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
+      const isPasswordValid = await bcrypt.compare(password, user.value);
+      if (!isPasswordValid) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
-    const isPasswordValid = await bcrypt.compare(password, user.value);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Contraseña incorrecta' });
-    }
+      // Notificar a RADIUS
+      notifyRadius(username);
 
-    // Notificar a RADIUS
-    notifyRadius(username);
-
-    res.status(200).json({ message: 'Inicio de sesión exitoso', user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+      // Responder al cliente
+      res.status(200).json({ message: 'Inicio de sesión exitoso' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error en el inicio de sesión' });
   }
 });
+
 
 // Inicia el servidor
 app.listen(PORT, () => {

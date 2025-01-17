@@ -12,24 +12,44 @@ export default function Home() {
   const [inpUser, setInpUser] = useState('');
   const [inpPass, setInpPass] = useState('');
 
-  const [trasitionLogin, setTransitionLogin]= useTransition()
-  const [transitionRegister, setTransitionRegister]= useTransition()
+  const [trasitionLogin, setTransitionLogin] = useTransition()
+  const [transitionRegister, setTransitionRegister] = useTransition()
 
   const CdlgRegister = () => {
     setDlgRegister(false);
   };
 
-  const IniciarSesion = (e:FormEvent)=>{
-    e.preventDefault()
-    setTransitionLogin(async()=>{
-      await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`,{
+  const IniciarSesion = async (e: FormEvent) => {
+    e.preventDefault(); // Evita que la página se recargue
+
+    try {
+      // Realiza la solicitud al backend
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
         username: inpUser.trim(),
-        password: inpUser.trim()
-      }).then((result)=>{
-        console.log(result.data)
-      })
-    })
-  }
+        password: inpPass.trim(),
+      });
+
+      // Si la solicitud es exitosa, muestra el mensaje del backend
+      if (response.status === 200) {
+        alert(`Éxito: ${response.data.message}`);
+        console.log("Usuario:", response.data.user); // Muestra los datos del usuario en consola
+      }
+    } catch (error: any) {
+      // Manejo de errores
+      if (error.response) {
+        // Error retornado por el servidor
+        alert(`Error: ${error.response.data.error}`);
+      } else if (error.request) {
+        // No se recibió respuesta del servidor
+        alert("Error: No se pudo conectar con el servidor.");
+      } else {
+        // Error desconocido
+        alert(`Error desconocido: ${error.message}`);
+      }
+      console.error(error);
+    }
+  };
+
 
   return (
     <>
