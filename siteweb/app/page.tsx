@@ -11,45 +11,36 @@ export default function Home() {
   const [dlgRegister, setDlgRegister] = useState(false);
   const [inpUser, setInpUser] = useState('');
   const [inpPass, setInpPass] = useState('');
-
+  const [message, setMessage] = useState('')
   const [trasitionLogin, setTransitionLogin] = useTransition()
-  const [transitionRegister, setTransitionRegister] = useTransition()
+  
 
   const CdlgRegister = () => {
     setDlgRegister(false);
   };
 
-  const IniciarSesion = async (e: FormEvent) => {
-    e.preventDefault(); // Evita que la página se recargue
+
+  const IniciarSesion = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     try {
-      // Realiza la solicitud al backend
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
         username: inpUser.trim(),
         password: inpPass.trim(),
       });
 
-      // Si la solicitud es exitosa, muestra el mensaje del backend
+      // Si es exitoso, notifica al usuario y deja el acceso
       if (response.status === 200) {
-        alert(`Éxito: ${response.data.message}`);
-        console.log("Usuario:", response.data.user); // Muestra los datos del usuario en consola
+        setMessage('Inicio de sesión exitoso. Conectando...');
+        // No es necesaria redirección; el AP otorga acceso automáticamente.
+        setTimeout(() => {
+          window.location.reload(); // Refresca para liberar el portal
+        }, 2000);
       }
     } catch (error: any) {
-      // Manejo de errores
-      if (error.response) {
-        // Error retornado por el servidor
-        alert(`Error: ${error.response.data.error}`);
-      } else if (error.request) {
-        // No se recibió respuesta del servidor
-        alert("Error: No se pudo conectar con el servidor.");
-      } else {
-        // Error desconocido
-        alert(`Error desconocido: ${error.message}`);
-      }
-      console.error(error);
+      setMessage(error.response?.data?.error || 'Error al iniciar sesión.');
     }
   };
-
 
   return (
     <>
