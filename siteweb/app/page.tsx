@@ -1,30 +1,24 @@
 'use client';
-
 import React, { FormEvent, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 
 export default function Home() {
+  const [inpUser, setInpUser] = useState('');
+  const [inpPass, setInpPass] = useState('');
   const searchParams = useSearchParams();
 
-  const ssid = searchParams.get('ga_ssid');
   const apMac = searchParams.get('ga_ap_mac');
   const nasId = searchParams.get('ga_nas_id');
   const serverIp = searchParams.get('ga_srvr');
   const clientMac = searchParams.get('ga_cmac');
 
-  const [inpUser, setInpUser] = useState('');
-  const [inpPass, setInpPass] = useState('');
-  const [message, setMessage] = useState('');
-
   const IniciarSesion = async (e: FormEvent) => {
     e.preventDefault();
-
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
         username: inpUser.trim(),
-        password: inpUser.trim(),
-        ssid,
+        password: inpPass.trim(),
         apMac,
         nasId,
         serverIp,
@@ -32,32 +26,22 @@ export default function Home() {
       });
 
       if (response.status === 200) {
-        setMessage('Inicio de sesión exitoso. Conectando...');
+        alert('Inicio de sesión exitoso. Redirigiendo...');
+        window.location.href = 'http://google.com';  // Redirigir al usuario tras el login
       }
-    } catch (error: any) {
-      setMessage(error.response?.data?.error || 'Error al iniciar sesión.');
+    } catch (error) {
+      alert('Error en el inicio de sesión.');
     }
   };
 
   return (
     <div>
-      <h1>Inicio de Sesión</h1>
+      <h2>Inicio de Sesión</h2>
       <form onSubmit={IniciarSesion}>
-        <label>Usuario:</label>
-        <input
-          type="text"
-          value={inpUser}
-          onChange={(e) => setInpUser(e.target.value)}
-        />
-        <label>Contraseña:</label>
-        <input
-          type="password"
-          value={inpPass}
-          onChange={(e) => setInpPass(e.target.value)}
-        />
+        <input type="text" placeholder="Usuario" value={inpUser} onChange={(e) => setInpUser(e.target.value)} />
+        <input type="password" placeholder="Contraseña" value={inpPass} onChange={(e) => setInpPass(e.target.value)} />
         <button type="submit">Iniciar Sesión</button>
       </form>
-      <p>{message}</p>
     </div>
   );
 }

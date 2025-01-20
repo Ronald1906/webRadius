@@ -10,45 +10,41 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de CORS
-const allowedOrigins = ['http://192.168.1.50:5001']; // Cambia por tus dominios permitidos
-app.use(cors({ origin: allowedOrigins }));
-
-// Middleware
+app.use(cors());
 app.use(express.json());
 
-// Función para notificar al servidor RADIUS
-const notifyRadius = (username, secret, clientIp) => {
+const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
   const packet = radius.encode({
     code: 'Access-Accept',
-    secret: secret, // Secret del punto de acceso (registrado en clients.conf)
+    secret: secret,
     attributes: [
       ['User-Name', username],
-      ['NAS-IP-Address', clientIp], // Opcional: IP del NAS que origina la solicitud
+      ['Called-Station-Id', apMac],  // MAC del AP
+      ['Calling-Station-Id', clientMac], // MAC del usuario
+      ['NAS-Identifier', nasId], // Identificador del AP
+      ['Framed-IP-Address', serverIp], // IP del servidor RADIUS
     ],
   });
 
   const client = dgram.createSocket('udp4');
-  client.send(packet, 0, packet.length, process.env.RADIUS_PORT, process.env.RADIUS_SERVER, (err) => {
+  client.send(packet, 0, packet.length, process.env.RADIUS_PORT, serverIp, (err) => {
     if (err) {
-      console.error('Error al notificar al servidor RADIUS:', err);
+      console.error('Error notificando a RADIUS:', err);
     } else {
-      console.log(`Notificación enviada a RADIUS para el usuario: ${username}`);
+      console.log(`Acceso concedido para ${username} en AP ${apMac}`);
     }
     client.close();
   });
 };
 
 app.post('/login', async (req, res) => {
-  const { username, password, ssid, apMac, nasId, serverIp, clientMac } = req.body;
-  console.log(req.body)
+  const { username, password, apMac, nasId, serverIp, clientMac } = req.body;
 
-  if (!username || !password || !clientMac || !apMac) {
+  if (!username || !password || !clientMac || !apMac || !serverIp) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' });
   }
 
   try {
-    // Validar usuario
     const user = await prisma.radcheck.findUnique({
       where: { username },
     });
@@ -62,76 +58,21 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
-    // Notificar al servidor RADIUS
-    const secret = 'radius'
+    const secret = process.env.RADIUS_SECRET
+
     if (!secret) {
       return res.status(403).json({ error: 'Punto de acceso no autorizado' });
     }
 
-    const packet = radius.encode({
-      code: 'Access-Accept',
-      secret,
-      attributes: [
-        ['User-Name', username],
-        ['Called-Station-Id', apMac],
-        ['Calling-Station-Id', clientMac],
-        ['NAS-Identifier', nasId],
-        ['Framed-IP-Address', serverIp],
-      ],
-    });
+    notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
 
-    const client = dgram.createSocket('udp4');
-    client.send(packet, 0, packet.length, process.env.RADIUS_PORT, serverIp, (err) => {
-      if (err) {
-        console.error('Error al notificar al servidor RADIUS:', err);
-        res.status(500).json({ error: 'Error al notificar al servidor RADIUS' });
-      } else {
-        console.log(`Notificación enviada para ${username}`);
-        res.status(200).json({ message: 'Acceso otorgado' });
-      }
-      client.close();
-    });
+    res.status(200).json({ message: 'Acceso concedido' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
   }
 });
 
-
-// Ruta: Registrar Usuario
-app.post('/register', async (req, res) => {
-  const { cedula, nombres, apellidos, genero, edad } = req.body;
-
-  if (!cedula || !nombres || !apellidos || !genero || !edad) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
-
-  try {
-    await prisma.persona.create({
-      data: {
-        cedula: cedula,
-        nombres: nombres,
-        apellidos: apellidos,
-        genero: genero,
-        edad: edad,
-        radcheck: {
-          create: {
-            attribute: 'Cleartext-Password',
-            op: ':=',
-            value: await bcrypt.hash(cedula, 10), // Contraseña encriptada
-          },
-        },
-      },
-    });
-
-    res.status(201).json({ message: 'Usuario registrado exitosamente' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al registrar usuario' });
-  }
-});
-
-// Inicia el servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
