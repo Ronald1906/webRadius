@@ -40,21 +40,21 @@ const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
 
 // Ruta para iniciar sesión
 app.post('/login', async (req, res) => {
-  const { username, password, apMac, nasId, serverIp, clientMac } = req.body;
+  const { cedula, password, apMac, nasId, serverIp, clientMac } = req.body;
 
-  if (!username || !password || !clientMac || !apMac || !serverIp) {
+  if (!cedula || !password || !clientMac || !apMac || !serverIp) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' });
   }
 
   try {
     const user = await prisma.radcheck.findUnique({
-      where: { username },
+      where: { username: cedula },
       include: {
-        persona: true,  // Incluye los datos de la relación con persona
+        persona: true, // Incluye los datos de la persona relacionada
       },
     });
 
-    if (!user) {
+    if (!user || !user.persona) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
@@ -68,12 +68,12 @@ app.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Punto de acceso no autorizado' });
     }
 
-    notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
+    notifyRadius(cedula, apMac, nasId, clientMac, serverIp, secret);
 
     res.status(200).json({
       message: 'Acceso concedido',
-      nombres: user.persona?.nombres,
-      apellidos: user.persona?.apellidos,
+      nombres: user.persona.nombres,
+      apellidos: user.persona.apellidos,
     });
   } catch (err) {
     console.error(err);
@@ -90,19 +90,18 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    // Verificar si la persona ya existe
-    const existingPerson = await prisma.persona.findUnique({
-      where: { cedula },
-    });
+    // Verificar si la persona o el usuario ya existen
+    const existingPerson = await prisma.persona.findUnique({ where: { cedula } });
+    const existingUser = await prisma.radcheck.findUnique({ where: { username: cedula } });
 
-    if (existingPerson) {
-      return res.status(400).json({ error: 'La persona ya está registrada.' });
+    if (existingPerson || existingUser) {
+      return res.status(400).json({ error: 'La persona o el usuario ya están registrados.' });
     }
 
     // Hashear la cédula para la contraseña
     const hashedPassword = await bcrypt.hash(cedula, 10);
 
-    // Insertar usuario en radcheck
+    // Insertar usuario en radcheck y persona
     await prisma.radcheck.create({
       data: {
         username: cedula,

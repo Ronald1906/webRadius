@@ -7,17 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model radcheck {
-  id        Int      @id @default(autoincrement()) @db.UnsignedInt
-  username  String   @unique(map: "unique_username") @db.VarChar(64)
-  attribute String   @default("") @db.VarChar(64)
-  op        String   @default("==") @db.Char(2)
-  value     String   @default("") @db.VarChar(253)
-  persona   persona?
-
-  @@index([username(length: 32)], map: "username")
-}
-
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model batch_history {
   id                Int       @id @default(autoincrement())
@@ -437,13 +426,24 @@ model payment_type {
 }
 
 model persona {
-  id        String   @id @db.Char(36)
+  id        String   @id @default(dbgenerated("(uuid())")) @db.Char(36)
   cedula    String   @unique(map: "cedula") @db.VarChar(64)
   nombres   String   @db.VarChar(100)
   apellidos String   @db.VarChar(100)
   genero    String   @db.Char(10)
   edad      Int
   radcheck  radcheck @relation(fields: [cedula], references: [username], onDelete: Cascade, map: "fk_persona_radcheck")
+}
+
+model radcheck {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  username  String   @unique(map: "unique_username") @db.VarChar(64)
+  attribute String   @default("") @db.VarChar(64)
+  op        String   @default("==") @db.Char(2)
+  value     String   @default("") @db.VarChar(253)
+  persona   persona?
+
+  @@index([username(length: 32)], map: "username")
 }
 
 model proxys {
