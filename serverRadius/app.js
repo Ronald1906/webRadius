@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Función para notificar al servidor RADIUS
 const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
   const packet = radius.encode({
     code: 'Access-Accept',
@@ -37,6 +38,7 @@ const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
   });
 };
 
+// Ruta para iniciar sesión
 app.post('/login', async (req, res) => {
   const { username, password, apMac, nasId, serverIp, clientMac } = req.body;
 
@@ -58,8 +60,7 @@ app.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
-    const secret = process.env.RADIUS_SECRET
-
+    const secret = process.env.RADIUS_SECRET;
     if (!secret) {
       return res.status(403).json({ error: 'Punto de acceso no autorizado' });
     }
@@ -70,6 +71,55 @@ app.post('/login', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
+  }
+});
+
+// Ruta para registrar un usuario
+app.post('/register', async (req, res) => {
+  const { cedula, nombres, apellidos, genero, edad } = req.body;
+
+  if (!cedula || !nombres || !apellidos || !genero || !edad) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+  }
+
+  try {
+    // Verificar si la persona ya existe en userinfo
+    const existingUser = await prisma.userinfo.findUnique({
+      where: { cedula },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'La persona ya está registrada.' });
+    }
+
+    // Hashear la cédula para la contraseña
+    const hashedPassword = await bcrypt.hash(cedula, 10);
+
+    // Insertar usuario en radcheck
+    await prisma.radcheck.create({
+      data: {
+        username: cedula,
+        attribute: 'Cleartext-Password',
+        op: ':=',
+        value: hashedPassword,
+      },
+    });
+
+    // Registrar datos en userinfo
+    await prisma.userinfo.create({
+      data: {
+        cedula,
+        nombres,
+        apellidos,
+        genero,
+        edad: Number(edad),
+      },
+    });
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente.' });
+  } catch (err) {
+    console.error('Error al registrar:', err);
+    res.status(500).json({ error: 'Error al registrar el usuario.' });
   }
 });
 
