@@ -49,6 +49,9 @@ app.post('/login', async (req, res) => {
   try {
     const user = await prisma.radcheck.findUnique({
       where: { username },
+      include: {
+        persona: true,  // Incluye los datos de la relación con persona
+      },
     });
 
     if (!user) {
@@ -67,7 +70,11 @@ app.post('/login', async (req, res) => {
 
     notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
 
-    res.status(200).json({ message: 'Acceso concedido' });
+    res.status(200).json({
+      message: 'Acceso concedido',
+      nombres: user.persona?.nombres,
+      apellidos: user.persona?.apellidos,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
@@ -83,12 +90,12 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    // Verificar si la persona ya existe en userinfo
-    const existingUser = await prisma.userinfo.findUnique({
+    // Verificar si la persona ya existe
+    const existingPerson = await prisma.persona.findUnique({
       where: { cedula },
     });
 
-    if (existingUser) {
+    if (existingPerson) {
       return res.status(400).json({ error: 'La persona ya está registrada.' });
     }
 
@@ -102,17 +109,15 @@ app.post('/register', async (req, res) => {
         attribute: 'Cleartext-Password',
         op: ':=',
         value: hashedPassword,
-      },
-    });
-
-    // Registrar datos en userinfo
-    await prisma.userinfo.create({
-      data: {
-        cedula,
-        nombres,
-        apellidos,
-        genero,
-        edad: Number(edad),
+        persona: {
+          create: {
+            cedula,
+            nombres,
+            apellidos,
+            genero,
+            edad: Number(edad),
+          },
+        },
       },
     });
 
