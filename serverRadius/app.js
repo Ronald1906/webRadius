@@ -49,12 +49,9 @@ app.post('/login', async (req, res) => {
   try {
     const user = await prisma.radcheck.findUnique({
       where: { username: cedula },
-      include: {
-        persona: true, // Incluye los datos de la persona relacionada
-      },
     });
 
-    if (!user || !user.persona) {
+    if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
@@ -72,8 +69,8 @@ app.post('/login', async (req, res) => {
 
     res.status(200).json({
       message: 'Acceso concedido',
-      nombres: user.persona.nombres,
-      apellidos: user.persona.apellidos,
+      nombres: user.nombres,
+      apellidos: user.apellidos,
     });
   } catch (err) {
     console.error(err);
@@ -90,33 +87,27 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    // Verificar si la persona o el usuario ya existen
-    const existingPerson = await prisma.persona.findUnique({ where: { cedula } });
+    // Verificar si el usuario ya existe en radcheck
     const existingUser = await prisma.radcheck.findUnique({ where: { username: cedula } });
 
-    if (existingPerson || existingUser) {
-      return res.status(400).json({ error: 'La persona o el usuario ya están registrados.' });
+    if (existingUser) {
+      return res.status(400).json({ error: 'El usuario ya está registrado.' });
     }
 
     // Hashear la cédula para la contraseña
     const hashedPassword = await bcrypt.hash(cedula, 10);
 
-    // Insertar usuario en radcheck y persona
+    // Insertar usuario en radcheck con los nuevos campos
     await prisma.radcheck.create({
       data: {
         username: cedula,
         attribute: 'Cleartext-Password',
         op: ':=',
         value: hashedPassword,
-        persona: {
-          create: {
-            cedula,
-            nombres,
-            apellidos,
-            genero,
-            edad: Number(edad),
-          },
-        },
+        nombres,
+        apellidos,
+        genero,
+        edad: Number(edad),
       },
     });
 

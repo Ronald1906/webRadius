@@ -5,7 +5,6 @@ import axios from 'axios';
 
 export default function Home() {
   const [inpUser, setInpUser] = useState('');
-  const [inpPass, setInpPass] = useState('');
   const searchParams = useSearchParams();
 
   const apMac = searchParams.get('ga_ap_mac');
@@ -18,7 +17,7 @@ export default function Home() {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
         username: inpUser.trim(),
-        password: inpPass.trim(),
+        password: inpUser.trim(),
         apMac,
         nasId,
         serverIp,
@@ -39,7 +38,6 @@ export default function Home() {
       <h2>Inicio de Sesión</h2>
       <form onSubmit={IniciarSesion}>
         <input type="text" placeholder="Usuario" value={inpUser} onChange={(e) => setInpUser(e.target.value)} />
-        <input type="password" placeholder="Contraseña" value={inpPass} onChange={(e) => setInpPass(e.target.value)} />
         <button type="submit">Iniciar Sesión</button>
       </form>
     </div>
