@@ -20,10 +20,15 @@ const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
     secret: secret,
     attributes: [
       ['User-Name', username],
+      ['Framed-IP-Address', clientMac],  // MAC del usuario como dirección IP
       ['Called-Station-Id', apMac],  // MAC del AP
       ['Calling-Station-Id', clientMac], // MAC del usuario
       ['NAS-Identifier', nasId], // Identificador del AP
-      ['Framed-IP-Address', serverIp], // IP del servidor RADIUS
+      ['Framed-Compression', 'Van-Jacobson-TCP-IP'],
+      ['Session-Timeout', 3600],  // Tiempo de sesión en segundos
+      ['Idle-Timeout', 600],  // Tiempo de inactividad en segundos
+      ['Service-Type', 'Framed-User'],
+      ['Framed-Protocol', 'PPP'],
     ],
   });
 
@@ -40,15 +45,15 @@ const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
 
 // Ruta para iniciar sesión
 app.post('/login', async (req, res) => {
-  const { cedula, password, apMac, nasId, serverIp, clientMac } = req.body;
+  const { username, password, apMac, nasId, serverIp, clientMac } = req.body;
 
-  if (!cedula || !password || !clientMac || !apMac || !serverIp) {
+  if (!username || !password || !clientMac || !apMac || !serverIp) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' });
   }
 
   try {
     const user = await prisma.radcheck.findUnique({
-      where: { username: cedula },
+      where: { username },
     });
 
     if (!user) {
@@ -65,7 +70,7 @@ app.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Punto de acceso no autorizado' });
     }
 
-    notifyRadius(cedula, apMac, nasId, clientMac, serverIp, secret);
+    notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
 
     res.status(200).json({
       message: 'Acceso concedido',
@@ -75,46 +80,6 @@ app.post('/login', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
-  }
-});
-
-// Ruta para registrar un usuario
-app.post('/register', async (req, res) => {
-  const { cedula, nombres, apellidos, genero, edad } = req.body;
-
-  if (!cedula || !nombres || !apellidos || !genero || !edad) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
-  }
-
-  try {
-    // Verificar si el usuario ya existe en radcheck
-    const existingUser = await prisma.radcheck.findUnique({ where: { username: cedula } });
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'El usuario ya está registrado.' });
-    }
-
-    // Hashear la cédula para la contraseña
-    const hashedPassword = await bcrypt.hash(cedula, 10);
-
-    // Insertar usuario en radcheck con los nuevos campos
-    await prisma.radcheck.create({
-      data: {
-        username: cedula,
-        attribute: 'Cleartext-Password',
-        op: ':=',
-        value: hashedPassword,
-        nombres,
-        apellidos,
-        genero,
-        edad: Number(edad),
-      },
-    });
-
-    res.status(201).json({ message: 'Usuario registrado exitosamente.' });
-  } catch (err) {
-    console.error('Error al registrar:', err);
-    res.status(500).json({ error: 'Error al registrar el usuario.' });
   }
 });
 
