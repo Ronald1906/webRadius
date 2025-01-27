@@ -1,28 +1,33 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import React, { FormEvent, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
 export default function Home() {
-  const [ip, setIp] = useState<string | null>(null);
+  const [inpUser, setInpUser] = useState('');
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const fetchIp = async () => {
-      try {
-        const response = await fetch('https://api64.ipify.org?format=json');
-        const data = await response.json();
-        setIp(data.ip);
-      } catch (error) {
-        console.error('Error obteniendo la IP:', error);
-      }
-    };
+  // Obtener parámetros de la URL de redirección del AP
+  const apMac = searchParams.get('ga_ap_mac');
+  const nasId = searchParams.get('ga_nas_id');
+  const serverIp = searchParams.get('ga_srvr');
+  const clientMac = searchParams.get('ga_cmac');
 
-    fetchIp();
-  }, []);
+  alert(`apMac: ${apMac}, nasId: ${nasId}, serverIp: ${serverIp}, clientMac: ${clientMac}`)
+
 
   return (
     <div>
-      <h1>Tu IP Pública</h1>
-      <p>{ip ? `IP: ${ip}` : 'Obteniendo IP...'}</p>
+      <h2>Inicio de Sesión</h2>
+      <form>
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={inpUser}
+          onChange={(e) => setInpUser(e.target.value)}
+        />
+        <button type="submit">Iniciar Sesión</button>
+      </form>
     </div>
   );
 }

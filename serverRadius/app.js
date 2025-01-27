@@ -20,15 +20,12 @@ const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
     secret: secret,
     attributes: [
       ['User-Name', username],
-      ['Framed-IP-Address', clientMac],  // MAC del usuario como dirección IP
       ['Called-Station-Id', apMac],  // MAC del AP
       ['Calling-Station-Id', clientMac], // MAC del usuario
       ['NAS-Identifier', nasId], // Identificador del AP
-      ['Framed-Compression', 'Van-Jacobson-TCP-IP'],
-      ['Session-Timeout', 3600],  // Tiempo de sesión en segundos
-      ['Idle-Timeout', 600],  // Tiempo de inactividad en segundos
-      ['Service-Type', 'Framed-User'],
-      ['Framed-Protocol', 'PPP'],
+      ['Framed-IP-Address', serverIp], // IP del servidor RADIUS
+      ['Session-Timeout', 3600], // Tiempo de sesión (1 hora)
+      ['Idle-Timeout', 600], // Tiempo de inactividad (10 minutos)
     ],
   });
 
@@ -57,29 +54,69 @@ app.post('/login', async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.value);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Contraseña incorrecta' });
+      return res.status(401).json({ error: 'Contraseña incorrecta.' });
     }
 
     const secret = process.env.RADIUS_SECRET;
     if (!secret) {
-      return res.status(403).json({ error: 'Punto de acceso no autorizado' });
+      return res.status(403).json({ error: 'Punto de acceso no autorizado.' });
     }
 
     notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
 
     res.status(200).json({
-      message: 'Acceso concedido',
+      message: 'Acceso concedido.',
       nombres: user.nombres,
       apellidos: user.apellidos,
     });
   } catch (err) {
-    console.error(err);
+    console.error('Error en /login:', err);
     res.status(500).json({ error: 'Error al iniciar sesión.' });
+  }
+});
+
+// Ruta para registrar un usuario
+app.post('/register', async (req, res) => {
+  const { cedula, nombres, apellidos, genero, edad } = req.body;
+
+  if (!cedula || !nombres || !apellidos || !genero || !edad) {
+    return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+  }
+
+  try {
+    // Verificar si el usuario ya existe en radcheck
+    const existingUser = await prisma.radcheck.findUnique({ where: { username: cedula } });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'El usuario ya está registrado.' });
+    }
+
+    // Hashear la cédula para la contraseña
+    const hashedPassword = await bcrypt.hash(cedula, 10);
+
+    // Insertar usuario en radcheck
+    await prisma.radcheck.create({
+      data: {
+        username: cedula,
+        attribute: 'Cleartext-Password',
+        op: ':=',
+        value: hashedPassword,
+        nombres,
+        apellidos,
+        genero,
+        edad: Number(edad),
+      },
+    });
+
+    res.status(201).json({ message: 'Usuario registrado exitosamente.' });
+  } catch (err) {
+    console.error('Error en /register:', err);
+    res.status(500).json({ error: 'Error al registrar el usuario.' });
   }
 });
 

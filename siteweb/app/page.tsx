@@ -21,7 +21,13 @@ export default function Home() {
       return;
     }
 
+    if (!apMac || !nasId || !serverIp || !clientMac) {
+      alert('Faltan parámetros necesarios en la URL.');
+      return;
+    }
+
     try {
+      // Enviar los datos al backend
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
         username: inpUser.trim(),
         password: inpUser.trim(),
@@ -33,10 +39,16 @@ export default function Home() {
 
       if (response.status === 200) {
         alert('Inicio de sesión exitoso. Redirigiendo...');
-        window.location.href = `http://${serverIp}:3990/logout`;  // Redirigir al portal de éxito
+        // Redirigir al portal de éxito o permitir acceso
+        window.location.href = `http://${serverIp}:3990/logout`; // Cambia esto si el servidor requiere otra ruta
       }
-    } catch (error) {
-      alert('Error en el inicio de sesión.');
+    } catch (error: any) {
+      // Manejar errores del backend
+      if (error.response && error.response.data && error.response.data.error) {
+        alert(`Error: ${error.response.data.error}`);
+      } else {
+        alert('Error desconocido al iniciar sesión.');
+      }
     }
   };
 
