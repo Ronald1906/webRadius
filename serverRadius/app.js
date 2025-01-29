@@ -13,31 +13,41 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Función para notificar al servidor RADIUS
+// Función para notificar al servidor RADIUS (1812 y 1813)
 const notifyRadius = (username, apMac, nasId, clientMac, serverIp, secret) => {
-  const packet = radius.encode({
-    code: 'Access-Accept',
-    secret: secret,
-    attributes: [
-      ['User-Name', username],
-      ['Called-Station-Id', apMac],  // MAC del AP
-      ['Calling-Station-Id', clientMac], // MAC del usuario
-      ['NAS-Identifier', nasId], // Identificador del AP
-      ['Framed-IP-Address', serverIp], // IP del servidor RADIUS
-      ['Session-Timeout', 3600], // Tiempo de sesión (1 hora)
-      ['Idle-Timeout', 600], // Tiempo de inactividad (10 minutos)
-    ],
-  });
+  const sendRadiusPacket = (port, attributes) => {
+    const packet = radius.encode({
+      code: 'Access-Accept',
+      secret: secret,
+      attributes,
+    });
 
-  const client = dgram.createSocket('udp4');
-  client.send(packet, 0, packet.length, process.env.RADIUS_PORT, serverIp, (err) => {
-    if (err) {
-      console.error('Error notificando a RADIUS:', err);
-    } else {
-      console.log(`Acceso concedido para ${username} en AP ${apMac}`);
-    }
-    client.close();
-  });
+    const client = dgram.createSocket('udp4');
+    client.send(packet, 0, packet.length, port, serverIp, (err) => {
+      if (err) {
+        console.error(`Error notificando a RADIUS en puerto ${port}:`, err);
+      } else {
+        console.log(`Notificación enviada a RADIUS en puerto ${port} para ${username}`);
+      }
+      client.close();
+    });
+  };
+
+  const attributes = [
+    ['User-Name', username],
+    ['Called-Station-Id', apMac], // MAC del AP
+    ['Calling-Station-Id', clientMac], // MAC del usuario
+    ['NAS-Identifier', nasId], // Identificador del AP
+    ['Framed-IP-Address', '0.0.0.0'], // IP del servidor RADIUS
+    ['Session-Timeout', 3600], // Tiempo de sesión (1 hora)
+    ['Idle-Timeout', 600], // Tiempo de inactividad (10 minutos)
+  ];
+
+  // Notificar al puerto 1812 (autenticación)
+  sendRadiusPacket(1812, attributes);
+
+  // Notificar al puerto 1813 (accounting)
+  sendRadiusPacket(1813, attributes);
 };
 
 // Ruta para iniciar sesión
@@ -49,6 +59,7 @@ app.post('/login', async (req, res) => {
   }
 
   try {
+    // Verificar al usuario en la base de datos
     const user = await prisma.radcheck.findUnique({
       where: { username },
     });
@@ -70,9 +81,7 @@ app.post('/login', async (req, res) => {
     notifyRadius(username, apMac, nasId, clientMac, serverIp, secret);
 
     res.status(200).json({
-      message: 'Acceso concedido.',
-      nombres: user.nombres,
-      apellidos: user.apellidos,
+      message: 'Acceso concedido. Usuario autenticado.',
     });
   } catch (err) {
     console.error('Error en /login:', err);
