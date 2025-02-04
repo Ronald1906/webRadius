@@ -1,69 +1,96 @@
-'use client';
-import React, { FormEvent, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import axios from 'axios';
+"use client";
 
-export default function Home() {
-  const [inpUser, setInpUser] = useState('');
-  const searchParams = useSearchParams();
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-  // Obtener parámetros de la URL de redirección del AP
-  const apMac = searchParams.get('ga_ap_mac');
-  const nasId = searchParams.get('ga_nas_id');
-  const serverIp = searchParams.get('ga_srvr');
-  const clientMac = searchParams.get('ga_cmac');
+const LoginForm = () => {
+  const [ced, setCed] = useState<string>("1105008369");
+  const [error, setError] = useState<string | null>(null);
+  
+  const searchParams = useSearchParams(); // Para obtener parámetros de la URL
 
-  const IniciarSesion = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!inpUser.trim()) {
-      alert('Ingrese un usuario válido');
+    
+    if (ced.length < 10) {
+      setError("La cédula debe tener al menos 10 caracteres.");
       return;
     }
 
-    if (!apMac || !nasId || !serverIp || !clientMac) {
-      alert('Faltan parámetros necesarios en la URL.');
+    setError(null);
+
+    const ga_srvr = searchParams.get("ga_srvr");
+    if (!ga_srvr) {
+      setError("Falta el parámetro 'ga_srvr' en la URL.");
       return;
     }
+
+    const apiUrl = `http://${ga_srvr}:880/cgi-bin/hotspot_login.cgi`;
 
     try {
-      // Enviar los datos al backend
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
-        username: inpUser.trim(),
-        password: inpUser.trim(),
-        apMac,
-        nasId,
-        serverIp,
-        clientMac,
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ced }),
       });
 
-      if (response.status === 200) {
-        alert('Inicio de sesión exitoso. Redirigiendo...');
-        // Redirigir al portal de éxito o permitir acceso
-        window.location.href = `http://${serverIp}:3990/logout`; // Cambia esto si el servidor requiere otra ruta
-      }
-    } catch (error: any) {
-      // Manejar errores del backend
-      if (error.response && error.response.data && error.response.data.error) {
-        alert(`Error: ${error.response.data.error}`);
-      } else {
-        alert('Error desconocido al iniciar sesión.');
-      }
+      if (!response.ok) throw new Error("Error en la autenticación");
+
+      console.log("Login exitoso");
+    } catch (error) {
+      console.error(error);
+      setError("No se pudo iniciar sesión.");
     }
   };
 
+  const generateUrl = () => {
+    const ga_srvr = searchParams.get("ga_srvr");
+    if (!ga_srvr) return null;
+
+    const url = new URL(`http://${ga_srvr}:880/cgi-bin/hotspot_login.cgi`);
+    searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value);
+    });
+
+    console.log(url.toString());
+    return url.toString();
+  };
+
   return (
-    <div>
-      <h2>Inicio de Sesión</h2>
-      <form onSubmit={IniciarSesion}>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={inpUser}
-          onChange={(e) => setInpUser(e.target.value)}
-        />
-        <button type="submit">Iniciar Sesión</button>
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-xl font-semibold mb-4">Login</h2>
+
+      {error && <p className="text-red-500">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block font-medium">Cédula:</label>
+          <input
+            type="text"
+            value={ced}
+            onChange={(e) => setCed(e.target.value)}
+            className="w-full border p-2 rounded-md"
+            required
+            minLength={10}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+        >
+          Iniciar sesión
+        </button>
       </form>
+
+      <button
+        onClick={generateUrl}
+        className="mt-4 text-blue-500 underline"
+      >
+        Generar URL
+      </button>
     </div>
   );
-}
+};
+
+export default LoginForm;
