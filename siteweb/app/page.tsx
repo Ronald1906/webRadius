@@ -43,6 +43,9 @@ const LoginForm = () => {
     Object.entries(params).forEach(([key, value]) => {
       if (value) url.searchParams.set(key, value);
     });
+    
+    alert(url)
+
 
     console.log("Redirigiendo a:", url.toString());
 
