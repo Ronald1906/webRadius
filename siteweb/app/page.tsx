@@ -28,32 +28,26 @@ const LoginForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inpUser.trim()) {
-      alert("Ingrese un usuario válido");
-      return;
-    }
-
     if (!params.serverIp) {
       alert("Falta el parámetro 'ga_srvr' en la URL.");
       return;
     }
 
-    // ✅ Construcción de la URL
+    // ✅ Construcción de la URL (idéntico a Angular)
     const url = new URL(`http://${params.serverIp}:880/cgi-bin/hotspot_login.cgi`);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) url.searchParams.set(key, value);
+
+    // ✅ Recorrer TODOS los parámetros de la URL (como en Angular)
+    searchParams.forEach((value, key) => {
+      url.searchParams.set(key, value || ''); // Agregar '' si el valor es null
     });
-    
-    alert(url)
 
+    console.log("URL generada en Next.js:", url.toString());
+    alert(url);
 
-    console.log("Redirigiendo a:", url.toString());
-
-    // ✅ Redirigir al usuario a la URL generada
-    //window.location.href = url.toString();
+    // ✅ Redirigir de la misma manera
     window.location.replace(url.toString());
-
   };
+
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
