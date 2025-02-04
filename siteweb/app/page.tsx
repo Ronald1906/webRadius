@@ -50,7 +50,9 @@ const LoginForm = () => {
     console.log("Redirigiendo a:", url.toString());
 
     // ✅ Redirigir al usuario a la URL generada
-    window.location.href = url.toString();
+    //window.location.href = url.toString();
+    window.location.replace(url.toString());
+
   };
 
   return (
