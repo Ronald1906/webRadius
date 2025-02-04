@@ -1,80 +1,69 @@
-"use client";
+'use client';
+import React, { FormEvent, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-
-const LoginForm = () => {
-  const [inpUser, setInpUser] = useState("");
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
-
+export default function Home() {
+  const [inpUser, setInpUser] = useState('');
   const searchParams = useSearchParams();
 
-  const [params, setParams] = useState({
-    apMac: "",
-    nasId: "",
-    serverIp: "",
-    clientMac: "",
-  });
+  // Obtener parámetros de la URL de redirección del AP
+  const apMac = searchParams.get('ga_ap_mac');
+  const nasId = searchParams.get('ga_nas_id');
+  const serverIp = searchParams.get('ga_srvr');
+  const clientMac = searchParams.get('ga_cmac');
 
-  // ✅ Obtener parámetros de la URL en `useEffect`
-  useEffect(() => {
-    setParams({
-      apMac: searchParams.get("ga_ap_mac") || "",
-      nasId: searchParams.get("ga_nas_id") || "",
-      serverIp: searchParams.get("ga_srvr") || "",
-      clientMac: searchParams.get("ga_cmac") || "",
-    });
-  }, [searchParams]);
+  const IniciarSesion = async (e: FormEvent) => {
+    e.preventDefault();
 
-  // ✅ Generar la URL con los parámetros obtenidos
-  const generateUrl = () => {
-    if (!params.serverIp) {
-      alert("Falta el parámetro 'ga_srvr' en la URL.");
+    if (!inpUser.trim()) {
+      alert('Ingrese un usuario válido');
       return;
     }
 
-    const url = new URL(`http://${params.serverIp}:880/cgi-bin/hotspot_login.cgi`);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) url.searchParams.set(key, value);
-    });
+    if (!apMac || !nasId || !serverIp || !clientMac) {
+      alert('Faltan parámetros necesarios en la URL.');
+      return;
+    }
 
-    setGeneratedUrl(url.toString()); // Guarda la URL generada
-    console.log("URL generada:", url.toString());
+    try {
+      // Enviar los datos al backend
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND}/login`, {
+        username: inpUser.trim(),
+        password: inpUser.trim(),
+        apMac,
+        nasId,
+        serverIp,
+        clientMac,
+      });
+
+      if (response.status === 200) {
+        alert('Inicio de sesión exitoso. Redirigiendo...');
+        // Redirigir al portal de éxito o permitir acceso
+        window.location.href = `http://${serverIp}:3990/logout`; // Cambia esto si el servidor requiere otra ruta
+      }
+    } catch (error: any) {
+      // Manejar errores del backend
+      if (error.response && error.response.data && error.response.data.error) {
+        alert(`Error: ${error.response.data.error}`);
+      } else {
+        alert('Error desconocido al iniciar sesión.');
+      }
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Login</h2>
-
-      <form onSubmit={(e) => { e.preventDefault(); generateUrl(); }} className="space-y-4">
-        <div>
-          <label className="block font-medium">Cédula:</label>
-          <input
-            type="text"
-            value={inpUser}
-            onChange={(e) => setInpUser(e.target.value)}
-            className="w-full border p-2 rounded-md"
-            required
-            minLength={10}
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
-        >
-          Generar URL
-        </button>
+    <div>
+      <h2>Inicio de Sesión</h2>
+      <form onSubmit={IniciarSesion}>
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={inpUser}
+          onChange={(e) => setInpUser(e.target.value)}
+        />
+        <button type="submit">Iniciar Sesión</button>
       </form>
-
-      {generatedUrl && (
-        <div className="mt-4 p-2 bg-gray-200 rounded-md">
-          <p className="text-sm">URL Generada:</p>
-          <p className="text-blue-600 break-all">{generatedUrl}</p>
-        </div>
-      )}
     </div>
   );
-};
-
-export default LoginForm;
+}
