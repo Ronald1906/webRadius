@@ -1,80 +1,61 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-const LoginForm = () => {
-  const [inpUser, setInpUser] = useState("");
+const Login = () => {
   const searchParams = useSearchParams();
+  const [url, setUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const cedRef = useRef<HTMLInputElement>(null);
 
-  const [params, setParams] = useState({
-    apMac: "",
-    nasId: "",
-    serverIp: "",
-    clientMac: "",
-  });
-
-  // ✅ Obtener parámetros de la URL en `useEffect`
-  useEffect(() => {
-    setParams({
-      apMac: searchParams.get("ga_ap_mac") || "",
-      nasId: searchParams.get("ga_nas_id") || "",
-      serverIp: searchParams.get("ga_srvr") || "",
-      clientMac: searchParams.get("ga_cmac") || "",
-    });
-  }, [searchParams]);
-
-  // ✅ Función para generar y redirigir a la URL
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!params.serverIp) {
-      alert("Falta el parámetro 'ga_srvr' en la URL.");
+  // ✅ Obtener la URL del servidor RADIUS con los parámetros actuales
+  const generateUrl = () => {
+    const ga_srvr = searchParams.get("ga_srvr");
+    if (!ga_srvr) {
+      setError("No se encontró el parámetro 'ga_srvr' en la URL.");
       return;
     }
 
-    // ✅ Construcción de la URL (idéntico a Angular)
-    const url = new URL(`http://${params.serverIp}:880/cgi-bin/hotspot_login.cgi`);
-
-    // ✅ Recorrer TODOS los parámetros de la URL (como en Angular)
+    const generatedUrl = new URL(`http://${ga_srvr}:880/cgi-bin/hotspot_login.cgi`);
+    
+    // ✅ Recorrer todos los parámetros de la URL y agregarlos a la nueva URL
     searchParams.forEach((value, key) => {
-      url.searchParams.set(key, value || ''); // Agregar '' si el valor es null
+      generatedUrl.searchParams.set(key, value || "");
     });
 
-    console.log("URL generada en Next.js:", url.toString());
-    alert(url);
-
-    // ✅ Redirigir de la misma manera
-    window.location.replace(url.toString());
+    setUrl(generatedUrl.toString());
+    console.log("URL generada:", generatedUrl.toString());
   };
 
+  // ✅ Generar la URL cuando los parámetros de la URL cambien
+  useEffect(() => {
+    generateUrl();
+  }, [searchParams]);
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Login</h2>
+    <div className="container mx-auto flex flex-col gap-2 items-center p-2">
+      <form method="post" action={url || "#"} className="flex flex-col gap-1 max-w-60 pb-2">
+        <label htmlFor="ced">Ingresa tu número de cédula:</label>
+        <input
+          ref={cedRef}
+          name="ga_user"
+          placeholder="07xxxxxxx"
+          className="border p-2"
+          type="text"
+          required
+          minLength={10}
+        />
+        <input name="ga_pass" className="border hidden" type="hidden" value={cedRef.current?.value || ""} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium">Cédula:</label>
-          <input
-            type="text"
-            value={inpUser}
-            onChange={(e) => setInpUser(e.target.value)}
-            className="w-full border p-2 rounded-md"
-            required
-            minLength={10}
-          />
-        </div>
+        {error && <span className="text-xs text-red-500">{error}</span>}
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
-        >
-          Iniciar Sesión
+        <button type="submit" className="bg-green-300 hover:brightness-110 px-4 py-2 rounded-2xl">
+          Enviar
         </button>
       </form>
     </div>
   );
 };
 
-export default LoginForm;
+export default Login;
