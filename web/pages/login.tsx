@@ -5,28 +5,52 @@ import React, { useEffect, useState } from "react";
 
 export default function Login() {
     const searchParams = useSearchParams();
-    const [params, setParams] = useState({
-        ga_srvr: "",
-        ga_cmac: "",
-    });
+    const [inpCedula, setInpCedula] = useState('');
+    const [formAction, setFormAction] = useState<string | null>(null);
 
     useEffect(() => {
-        setParams({
-            ga_srvr: searchParams.get("ga_srvr") || "No definido",
-            ga_cmac: searchParams.get("ga_cmac") || "No definido",
+        const ga_srvr = searchParams.get("ga_srvr");
+        if (!ga_srvr) return;
+
+        const url = new URL(`http://${ga_srvr}:880/cgi-bin/hotspot_login.cgi`);
+
+        // ✅ Agregar los parámetros actuales de la URL
+        searchParams.forEach((value, key) => {
+            url.searchParams.set(key, value || '');
         });
 
-        console.log("🚀 Parámetros obtenidos:", {
-            ga_srvr: searchParams.get("ga_srvr"),
-            ga_cmac: searchParams.get("ga_cmac"),
-        });
-    }, [searchParams]); // Se ejecuta cada vez que cambian los parámetros
+        setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
+    }, [searchParams]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formAction) return;
+
+        // ✅ Agregar usuario y contraseña a la URL antes de enviar
+        const finalUrl = new URL(formAction);
+        finalUrl.searchParams.set('ga_user', inpCedula);
+        finalUrl.searchParams.set('ga_pass', inpCedula);
+
+        console.log("🚀 URL generada:", finalUrl.toString());
+
+        // ✅ Redirigir al usuario a la URL de autenticación
+        window.location.replace(finalUrl.toString());
+    };
 
     return (
-        <div>
-            <h1>Login del Portal Cautivo</h1>
-            <p><strong>Servidor RADIUS:</strong> {params.ga_srvr}</p>
-            <p><strong>MAC del Cliente:</strong> {params.ga_cmac}</p>
+        <div className="bodyLogin">
+            <div className="container">
+                <h2>Inicio de Sesión</h2>
+                <form onSubmit={handleSubmit}>
+                    <input
+                        type="text"
+                        placeholder="Ingrese la cédula"
+                        value={inpCedula}
+                        onChange={(e) => setInpCedula(e.target.value)}
+                    />
+                    <button type="submit">Ingresar</button>
+                </form>
+            </div>
         </div>
     );
 }
