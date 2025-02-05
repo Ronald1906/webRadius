@@ -22,7 +22,7 @@ export default function Login() {
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
     }, [searchParams]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmis = (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -36,6 +36,38 @@ export default function Login() {
         // ✅ Redirigir al usuario a la URL de autenticación
         window.location.replace(finalUrl.toString());
     };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formAction) return;
+    
+        // ✅ Crear la URL con los parámetros
+        const finalUrl = new URL(formAction);
+        finalUrl.searchParams.set('ga_user', inpCedula);
+        finalUrl.searchParams.set('ga_pass', inpCedula);
+    
+        console.log("🚀 Enviando datos a:", finalUrl.toString());
+    
+        try {
+            // ✅ Enviar la solicitud con `POST`
+            const response = await fetch(finalUrl.toString(), {
+                method: "POST",
+            });
+    
+            if (response.ok) {
+                // ✅ Si la respuesta es `200`, autenticación exitosa
+                alert("✅ Inicio de sesión exitoso. Redirigiendo...");
+                window.location.href = `http://${searchParams.get("ga_srvr")}:3990/logout`; // O la URL de éxito
+            } else {
+                // ❌ Si la respuesta es `400`, mostrar alerta de error
+                alert("⚠️ Error al iniciar sesión. Verifique sus datos o regístrese primero.");
+            }
+        } catch (error) {
+            console.error("❌ Error de conexión:", error);
+            alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
+        }
+    };
+    
 
     return (
         <div className="bodyLogin">
