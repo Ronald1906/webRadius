@@ -40,34 +40,36 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
-    
+
         // ✅ Crear la URL con los parámetros
         const finalUrl = new URL(formAction);
         finalUrl.searchParams.set('ga_user', inpCedula);
         finalUrl.searchParams.set('ga_pass', inpCedula);
-    
+
         console.log("🚀 Enviando datos a:", finalUrl.toString());
-    
+
         try {
-            // ✅ Enviar la solicitud con `POST`
+            // ✅ Hacer la petición con fetch
             const response = await fetch(finalUrl.toString(), {
                 method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }, // Algunos servidores requieren esto
             });
-    
+
+            const textResponse = await response.text(); // Captura la respuesta
+
             if (response.ok) {
-                // ✅ Si la respuesta es `200`, autenticación exitosa
-                alert("✅ Inicio de sesión exitoso. Redirigiendo...");
-                window.location.href = `http://${searchParams.get("ga_srvr")}:3990/logout`; // O la URL de éxito
+                console.log("✅ Acceso concedido, redirigiendo...");
+                window.location.href = "http://www.google.com"; // Puedes cambiarlo por la URL que necesites
             } else {
-                // ❌ Si la respuesta es `400`, mostrar alerta de error
-                alert("⚠️ Error al iniciar sesión. Verifique sus datos o regístrese primero.");
+                console.error("⚠️ Error de autenticación:", textResponse);
+                alert(`⚠️ Acceso denegado: ${textResponse}`);
             }
         } catch (error) {
             console.error("❌ Error de conexión:", error);
             alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
         }
     };
-    
+
 
     return (
         <div className="bodyLogin">
