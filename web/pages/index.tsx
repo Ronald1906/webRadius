@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 const Login = () => {
   const searchParams = useSearchParams();
   const [formAction, setFormAction] = useState<string | null>(null);
-  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return; // Evita SSR
@@ -21,50 +20,24 @@ const Login = () => {
 
     // ✅ Agregar todos los parámetros de la URL a la nueva URL
     searchParams.forEach((value, key) => {
-      generatedUrl.searchParams.set(key, value || "");
+      let paramValue = value || "";
+
+      // ✅ Forzar `ga_orig_url` a la misma que se usa en Angular
+      if (key === "ga_orig_url") {
+        paramValue = "http://detectportal.brave-http-only.com/";
+      }
+
+      generatedUrl.searchParams.set(key, paramValue);
     });
 
     setFormAction(generatedUrl.toString()); // ✅ Actualiza la URL del formulario
-    console.log("🚀 URL generada:", generatedUrl.toString());
+    console.log("🚀 URL generada (corregida):", generatedUrl.toString());
   }, [searchParams]);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!formAction) {
-      alert("No se ha generado la URL de autenticación.");
-      return;
-    }
-
-    // ✅ Crear un formulario manualmente para enviar los datos con POST
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = formAction;
-
-    // ✅ Agregar inputs ocultos con los valores que se deben enviar
-    searchParams.forEach((value, key) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value || "";
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-
-    // 🚀 Esperar la redirección automática, pero si no ocurre, forzarla
-    setTimeout(() => {
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      }
-    }, 3000); // Esperar 3 segundos para ver si la redirección ocurre automáticamente
-  };
 
   return (
     <div className="container mx-auto flex flex-col gap-2 items-center p-2">
       {formAction ? (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-1 max-w-60 pb-2">
+        <form method="post" action={formAction} className="flex flex-col gap-1 max-w-60 pb-2">
           <label htmlFor="ced">Ingresa tu número de cédula:</label>
           <input
             name="ga_user"
