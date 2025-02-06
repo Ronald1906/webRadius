@@ -113,14 +113,15 @@ a {
 
 /*SECCION PARA EL DIALOGO INFORMATIVO*/
 
-.dlgheader{
+.dlgheader {
   background-color: #ffffff;
 }
 
 .dlgInformativo {
   width: 25%;
   height: 70%;
-  overflow: hidden; /* Evita el scroll dentro del diálogo */
+  overflow: hidden;
+  /* Evita el scroll dentro del diálogo */
   display: flex;
   justify-content: center;
 }
@@ -158,9 +159,14 @@ a {
   }
 }
 
-@media (min-width: 600px) and (max-width: 1024px) {
+@media (min-width: 750px) and (max-width: 1024px) {
+
+  .containerCentered {
+    width: 60%;
+  }
+
   .dlgInformativo {
     width: 50%;
-    height: 60%;
   }
+
 }
