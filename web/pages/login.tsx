@@ -142,7 +142,6 @@ export default function Login() {
                 <div className="formWrapper">
                     {isRegistering ? (
                         <div className="form">
-                            <h2>Registro</h2>
                             <div className="form-container">
                                 <span>Ingrese su cédula</span>
                                 <InputText
