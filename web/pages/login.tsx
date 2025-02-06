@@ -54,22 +54,29 @@ export default function Login() {
 
         // ✅ Crear la URL con los parámetros
         const finalUrl = new URL(formAction);
-        finalUrl.searchParams.set('ga_user', inpCedula);
-        finalUrl.searchParams.set('ga_pass', inpCedula);
 
-        console.log(finalUrl)
+        // Agregar parámetros, excluyendo 'ga_orig_url'
+        if (inpCedula) {
+            finalUrl.searchParams.set('ga_user', inpCedula);
+            finalUrl.searchParams.set('ga_pass', inpCedula);
+        }
+
+        // ❌ Eliminar 'ga_orig_url' si está presente
+        finalUrl.searchParams.delete('ga_orig_url');
+
+        console.log(finalUrl);
 
         console.log("🚀 Enviando datos a:", finalUrl.toString());
 
-        /*try {
+        try {
             // ✅ Hacer la petición con fetch
             const response = await fetch(finalUrl.toString(), {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" }, // Algunos servidores requieren esto
             });
-
+    
             const textResponse = await response.text(); // Captura la respuesta
-
+    
             if (response.ok) {
                 console.log("✅ Acceso concedido, redirigiendo...");
                 window.location.href = "http://www.google.com"; // Puedes cambiarlo por la URL que necesites
@@ -80,8 +87,9 @@ export default function Login() {
         } catch (error) {
             console.error("❌ Error de conexión:", error);
             alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
-        }*/
+        }
     };
+
 
 
     return (
@@ -108,7 +116,7 @@ export default function Login() {
                         <div className="form">
                             <h2>Iniciar Sesión</h2>
                             <input type="text" placeholder="Cédula" />
-                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" onClick={handleSubmit}/>
+                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" onClick={handleSubmit} />
                         </div>
                     )}
                 </div>
