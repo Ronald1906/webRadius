@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
 import { Dialog } from 'primereact/dialog'
@@ -46,7 +46,7 @@ export default function Login() {
     // };
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -131,7 +131,7 @@ export default function Login() {
                                     required
                                     onChange={(e) => setInpCedula(e.target.value)}
                                 />
-                                <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" />
+                                <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" />
                             </form>
                         </div>
                     )}
