@@ -2,13 +2,22 @@
 
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { Button } from 'primereact/button'
+import { InputText } from 'primereact/inputtext'
+import { Image } from 'primereact/image'
 
 export default function Login() {
     const searchParams = useSearchParams();
-    const [inpCedula, setInpCedula] = useState('');
     const [formAction, setFormAction] = useState<string | null>(null);
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [inpCedula, setInpCedula] = useState('');
+    const [inpNombres, setInpNombres] = useState('')
+    const [inpApellidos, setInpApellidos] = useState('')
+    const [inpNacimiento, setInpNacimiento] = useState('')
+    const [slcGenero, setSlcGenero] = useState('')
 
-    useEffect(() => {
+
+    /*useEffect(() => {
         const ga_srvr = searchParams.get("ga_srvr");
         if (!ga_srvr) return;
 
@@ -20,9 +29,9 @@ export default function Login() {
         });
 
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
-    }, [searchParams]);
+    }, [searchParams]);*/
 
-    const handleSubmis = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -37,7 +46,7 @@ export default function Login() {
         window.location.replace(finalUrl.toString());
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    /*const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -68,22 +77,54 @@ export default function Login() {
             console.error("❌ Error de conexión:", error);
             alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
         }
-    };
+    };*/
 
 
     return (
-        <div className="bodyLogin">
-            <div className="container">
-                <h2>Inicio de Sesión</h2>
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        placeholder="Ingrese la cédula"
-                        value={inpCedula}
-                        onChange={(e) => setInpCedula(e.target.value)}
-                    />
-                    <button type="submit">Ingresar</button>
-                </form>
+        <div className="screen">
+            <div className="containerCentered">
+                <Image src="./logoInst1.png" />
+                {/* FORMULARIOS CONDICIONALES */}
+                <div className="formWrapper">
+                    {isRegistering ? (
+                        <div className="form">
+                            <h2>Registro</h2>
+                            <input type="text" placeholder="Cédula" />
+                            <input type="text" placeholder="Nombres" />
+                            <input type="text" placeholder="Apellidos" />
+                            <input type="date" placeholder="Fecha de Nacimiento" />
+                            <select value={slcGenero} onChange={(e) => setSlcGenero(e.target.value)} className="selectInput">
+                                <option value="">Selecciona tu género</option>
+                                <option value="masculino">Masculino</option>
+                                <option value="femenino">Femenino</option>
+                            </select>
+                            <Button label="Registrarse" className="w-full py-2 border-round-md" severity="info" />
+                        </div>
+                    ) : (
+                        <div className="form">
+                            <h2>Iniciar Sesión</h2>
+                            <input type="text" placeholder="Cédula" />
+                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" />
+                        </div>
+                    )}
+                </div>
+
+                {/* BOTÓN PARA CAMBIAR ENTRE LOGIN Y REGISTRO */}
+                <div className="toggleSection">
+                    <p>
+                        {isRegistering ? (
+                            <>
+                                ¿Ya tienes una cuenta? Inicia sesión para acceder a la red pública del GAD Provincial de Santo Domingo.{" "}
+                                <span className="link" onClick={() => setIsRegistering(false)}>Ingresar</span>
+                            </>
+                        ) : (
+                            <>
+                                ¿Es tu primera vez en la red pública del GAD Provincial de Santo Domingo?{" "}
+                                <span className="link" onClick={() => setIsRegistering(true)}>Registrarse</span> para obtener acceso.
+                            </>
+                        )}
+                    </p>
+                </div>
             </div>
         </div>
     );
