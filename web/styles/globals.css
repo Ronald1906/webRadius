@@ -86,8 +86,8 @@ a {
   width: 100%;
 }
 
-.form h2{
-  color:  #001a63;
+.form h2 {
+  color: #001a63;
 }
 
 .form input {
@@ -111,6 +111,32 @@ a {
   margin-top: 20px;
 }
 
+/*SECCION PARA EL DIALOGO INFORMATIVO*/
+
+.dlgheader{
+  background-color: #ffffff;
+}
+
+.dlgInformativo {
+  width: 25%;
+  height: 70%;
+  overflow: hidden; /* Evita el scroll dentro del diálogo */
+  display: flex;
+  justify-content: center;
+}
+
+.container-informativo {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.container-informativo img {
+  height: 100%;
+  width: 100%;
+}
+
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .containerCentered {
@@ -119,5 +145,22 @@ a {
 
   .form input {
     font-size: 14px;
+  }
+
+
+  .dlgInformativo {
+    width: 80%;
+  }
+
+  .container-informativo img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1024px) {
+  .dlgInformativo {
+    width: 50%;
+    height: 60%;
   }
 }

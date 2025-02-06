@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
+import { Dialog } from 'primereact/dialog'
 import { Image } from 'primereact/image'
 
 export default function Login() {
@@ -15,9 +16,10 @@ export default function Login() {
     const [inpApellidos, setInpApellidos] = useState('')
     const [inpNacimiento, setInpNacimiento] = useState('')
     const [slcGenero, setSlcGenero] = useState('')
+    const [dlgInformativo, setDlgInformativo] = useState(true)
 
 
-    /*useEffect(() => {
+    useEffect(() => {
         const ga_srvr = searchParams.get("ga_srvr");
         if (!ga_srvr) return;
 
@@ -29,9 +31,9 @@ export default function Login() {
         });
 
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
-    }, [searchParams]);*/
+    }, [searchParams]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    /*const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -44,9 +46,9 @@ export default function Login() {
 
         // ✅ Redirigir al usuario a la URL de autenticación
         window.location.replace(finalUrl.toString());
-    };
+    };*/
 
-    /*const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -55,9 +57,11 @@ export default function Login() {
         finalUrl.searchParams.set('ga_user', inpCedula);
         finalUrl.searchParams.set('ga_pass', inpCedula);
 
+        console.log(finalUrl)
+
         console.log("🚀 Enviando datos a:", finalUrl.toString());
 
-        try {
+        /*try {
             // ✅ Hacer la petición con fetch
             const response = await fetch(finalUrl.toString(), {
                 method: "POST",
@@ -76,14 +80,14 @@ export default function Login() {
         } catch (error) {
             console.error("❌ Error de conexión:", error);
             alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
-        }
-    };*/
+        }*/
+    };
 
 
     return (
         <div className="screen">
             <div className="containerCentered">
-                <Image src="./logoInst1.png" />
+                <Image src="./logov2.png" />
                 {/* FORMULARIOS CONDICIONALES */}
                 <div className="formWrapper">
                     {isRegistering ? (
@@ -104,7 +108,7 @@ export default function Login() {
                         <div className="form">
                             <h2>Iniciar Sesión</h2>
                             <input type="text" placeholder="Cédula" />
-                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" />
+                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" onClick={handleSubmit}/>
                         </div>
                     )}
                 </div>
@@ -126,6 +130,14 @@ export default function Login() {
                     </p>
                 </div>
             </div>
+            <Dialog visible={dlgInformativo} onHide={() => setDlgInformativo(false)}
+                className="dlgInformativo" headerClassName="dlgheader"
+            >
+                <div className="container-informativo">
+                    <Image src="./artes/1.jpeg" className="" />
+                </div>
+
+            </Dialog>
         </div>
     );
 }
