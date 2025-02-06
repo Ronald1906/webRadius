@@ -135,9 +135,10 @@ export default function Login() {
                                     value={inpCedula}
                                     required
                                     onChange={(e) => setInpCedula(e.target.value)}
-                                    onClick={handleSubmit}
                                 />
-                                <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" />
+                                <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" 
+                                onClick={handleSubmit}
+                                />
                             </form>
                         </div>
                     )}
