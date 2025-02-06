@@ -33,7 +33,7 @@ export default function Login() {
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
     }, [searchParams]);
 
-    /*const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -42,13 +42,11 @@ export default function Login() {
         finalUrl.searchParams.set('ga_user', inpCedula);
         finalUrl.searchParams.set('ga_pass', inpCedula);
 
-        console.log("🚀 URL generada:", finalUrl.toString());
-
         // ✅ Redirigir al usuario a la URL de autenticación
         window.location.replace(finalUrl.toString());
-    };*/
+    };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    /*const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
 
@@ -60,9 +58,6 @@ export default function Login() {
             finalUrl.searchParams.set('ga_user', inpCedula);
             finalUrl.searchParams.set('ga_pass', inpCedula);
         }
-
-        // ❌ Eliminar 'ga_orig_url' si está presente
-        finalUrl.searchParams.delete('ga_orig_url');
 
         console.log(finalUrl);
 
@@ -88,7 +83,7 @@ export default function Login() {
             console.error("❌ Error de conexión:", error);
             alert("⚠️ No se pudo conectar con el servidor. Inténtelo más tarde.");
         }
-    };
+    };*/
 
 
 
