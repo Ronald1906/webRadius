@@ -130,11 +130,12 @@ export default function Login() {
                     ) : (
                         <div className="form" >
                             <h2>Iniciar Sesión</h2>
-                            <form className="form-container" onSubmit={handleSubmit}>
+                            <form className="form-container">
                                 <InputText type="text" placeholder="Cédula"
                                     value={inpCedula}
                                     required
                                     onChange={(e) => setInpCedula(e.target.value)}
+                                    onClick={handleSubmit}
                                 />
                                 <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" />
                             </form>
