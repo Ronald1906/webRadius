@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model radacct {
+  radacctid           BigInt    @id @default(autoincrement())
+  acctsessionid       String    @default("") @db.VarChar(64)
+  acctuniqueid        String    @unique(map: "acctuniqueid") @default("") @db.VarChar(32)
+  username            String    @default("") @db.VarChar(64)
+  realm               String?   @default("") @db.VarChar(64)
+  nasipaddress        String    @default("") @db.VarChar(15)
+  nasportid           String?   @db.VarChar(32)
+  nasporttype         String?   @db.VarChar(32)
+  acctstarttime       DateTime? @db.DateTime(0)
+  acctupdatetime      DateTime? @db.DateTime(0)
+  acctstoptime        DateTime? @db.DateTime(0)
+  acctinterval        Int?
+  acctsessiontime     Int?      @db.UnsignedInt
+  acctauthentic       String?   @db.VarChar(32)
+  connectinfo_start   String?   @db.VarChar(128)
+  connectinfo_stop    String?   @db.VarChar(128)
+  acctinputoctets     BigInt?
+  acctoutputoctets    BigInt?
+  calledstationid     String    @default("") @db.VarChar(50)
+  callingstationid    String    @default("") @db.VarChar(50)
+  acctterminatecause  String    @default("") @db.VarChar(32)
+  servicetype         String?   @db.VarChar(32)
+  framedprotocol      String?   @db.VarChar(32)
+  framedipaddress     String    @default("") @db.VarChar(15)
+  framedipv6address   String    @default("") @db.VarChar(45)
+  framedipv6prefix    String    @default("") @db.VarChar(45)
+  framedinterfaceid   String    @default("") @db.VarChar(44)
+  delegatedipv6prefix String    @default("") @db.VarChar(45)
+  class               String?   @db.VarChar(64)
+
+  @@index([acctinterval], map: "acctinterval")
+  @@index([acctsessionid], map: "acctsessionid")
+  @@index([acctsessiontime], map: "acctsessiontime")
+  @@index([acctstarttime], map: "acctstarttime")
+  @@index([acctstoptime], map: "acctstoptime")
+  @@index([class], map: "class")
+  @@index([delegatedipv6prefix], map: "delegatedipv6prefix")
+  @@index([framedinterfaceid], map: "framedinterfaceid")
+  @@index([framedipaddress], map: "framedipaddress")
+  @@index([framedipv6address], map: "framedipv6address")
+  @@index([framedipv6prefix], map: "framedipv6prefix")
+  @@index([nasipaddress], map: "nasipaddress")
+  @@index([username], map: "username")
+}
+
+model radcheck {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  username   String   @unique(map: "unique_username") @db.VarChar(64)
+  nombres    String   @db.VarChar(100)
+  apellidos  String   @db.VarChar(100)
+  genero     String   @db.Char(10)
+  edad       Int
+  attribute  String   @default("") @db.VarChar(64)
+  op         String   @default("==") @db.Char(2)
+  value      String   @default("") @db.VarChar(253)
+  nacimiento DateTime @db.Date
+  correo     String   @default("") @db.VarChar(255)
+
+  @@index([username(length: 32)], map: "username")
+}
+
+model radpostauth {
+  id       Int      @id @default(autoincrement())
+  username String   @default("") @db.VarChar(64)
+  pass     String   @default("") @db.VarChar(64)
+  reply    String   @default("") @db.VarChar(32)
+  authdate DateTime @default(now()) @db.Timestamp(6)
+  class    String?  @db.VarChar(64)
+
+  @@index([class], map: "class")
+  @@index([username], map: "username")
+}
+
