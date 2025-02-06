@@ -33,6 +33,20 @@ export default function Login() {
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
     }, [searchParams]);
 
+    /*const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formAction) return;
+
+        // ✅ Agregar usuario y contraseña a la URL antes de enviar
+        const finalUrl = new URL(formAction);
+        finalUrl.searchParams.set('ga_user', inpCedula);
+        finalUrl.searchParams.set('ga_pass', inpCedula);
+
+        // ✅ Redirigir al usuario a la URL de autenticación
+        window.location.replace(finalUrl.toString());
+    };*/
+
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!formAction) return;
@@ -41,6 +55,8 @@ export default function Login() {
         const finalUrl = new URL(formAction);
         finalUrl.searchParams.set('ga_user', inpCedula);
         finalUrl.searchParams.set('ga_pass', inpCedula);
+
+        console.log("🚀 URL generada:", finalUrl.toString());
 
         // ✅ Redirigir al usuario a la URL de autenticación
         window.location.replace(finalUrl.toString());
@@ -87,6 +103,7 @@ export default function Login() {
 
 
 
+
     return (
         <div className="screen">
             <div className="containerCentered">
@@ -108,11 +125,11 @@ export default function Login() {
                             <Button label="Registrarse" className="w-full py-2 border-round-md" severity="info" />
                         </div>
                     ) : (
-                        <div className="form">
+                        <form className="form" onSubmit={handleSubmit}>
                             <h2>Iniciar Sesión</h2>
                             <input type="text" placeholder="Cédula" />
-                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" onClick={handleSubmit} />
-                        </div>
+                            <Button label="Ingresar" className="w-full py-2 border-round-md" severity="info" />
+                        </form>
                     )}
                 </div>
 
