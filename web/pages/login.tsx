@@ -202,7 +202,6 @@ export default function Login() {
                                 <InputText
                                     placeholder="Ingrese ..."
                                     value={inpCorreo}
-                                    required
                                     type="email"
                                     onChange={(e) => setInpCorreo(e.target.value)}
                                 />
