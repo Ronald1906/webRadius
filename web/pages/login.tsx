@@ -11,6 +11,7 @@ import { Image } from 'primereact/image'
 export default function Login() {
     const searchParams = useSearchParams();
     const [formAction, setFormAction] = useState<string | null>(null);
+    const [isRegistering, setIsRegistering] = useState(false);
     const [inpCedula, setInpCedula] = useState('');
     const [inpNombres, setInpNombres] = useState('')
     const [inpApellidos, setInpApellidos] = useState('')
@@ -18,7 +19,6 @@ export default function Login() {
     const [dlgInformativo, setDlgInformativo] = useState(true)
     const [slcGenero, setSlcGenero] = useState('')
     const [inpCorreo, setInpCorreo] = useState('')
-    const [dlgRegistro, setDlgRegistro] = useState(false)
 
     const DrpGenero = [
         { value: 'FEMENINO' },
@@ -124,21 +124,23 @@ export default function Login() {
             }
 
             alert("✅ Usuario registrado correctamente.");
+
+            if (formAction) {
+                // ✅ Si la validación fue exitosa, construir la URL y redirigir
+                const finalUrl = new URL(formAction);
+                finalUrl.searchParams.set("ga_user", inpCedula);
+                finalUrl.searchParams.set("ga_pass", inpCedula);
+
+                // ✅ Redirigir al usuario a la URL de autenticación
+                window.location.replace(finalUrl.toString());
+            }
+
         } catch (error) {
             console.error("❌ Error al registrar usuario:", error);
             alert("⚠️ No se pudo registrar el usuario. Inténtelo más tarde.");
         }
     };
 
-    const CdlgRegistro = () => {
-        setDlgRegistro(false)
-        setInpCedula('')
-        setInpNombres('')
-        setInpApellidos('')
-        setInpCorreo('')
-        setInpNacimiento('')
-        setSlcGenero('')
-    }
 
 
 
@@ -149,45 +151,9 @@ export default function Login() {
                 <Image src="./logov2.png" />
                 {/* FORMULARIOS CONDICIONALES */}
                 <div className="formWrapper">
-                    <div className="form" >
-                        <h2>Iniciar Sesión</h2>
-                        <form className="form-container" onSubmit={handleSubmit}>
-                            <InputText type="text" placeholder="Cédula"
-                                value={inpCedula}
-                                required
-                                onChange={(e) => setInpCedula(e.target.value)}
-                            />
-                            <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" />
-                        </form>
-                    </div>
-                </div>
-
-                {/* BOTÓN PARA CAMBIAR ENTRE LOGIN Y REGISTRO */}
-                <div className="toggleSection">
-                    <p>
-                        ¿Es tu primera vez en la red pública del GAD Provincial de Santo Domingo?{" "}
-                        <span className="link" onClick={() => setDlgRegistro(true)}>Registrate</span> para obtener acceso.
-                    </p>
-                </div>
-            </div>
-            <Dialog visible={dlgInformativo} onHide={() => setDlgInformativo(false)}
-                className="dlgInformativo" headerClassName="dlgheader"
-            >
-                <div className="container-informativo">
-                    <Image src="./artes/1.jpeg" className="" />
-                </div>
-
-            </Dialog>
-
-            <Dialog visible={dlgRegistro} onHide={CdlgRegistro}
-                className="dlgInformativo"
-            >
-                <div className="containerdlgReg">
-                    <Image src="./logov2.png" />
-                    <div className="formWrapper">
+                    {isRegistering ? (
                         <div className="form">
-                            <h2>Registro</h2>
-                            <div className="form-container">
+                            <form className="form-container" onSubmit={handleRegister} >
                                 <span>Ingrese su cédula</span>
                                 <InputText
                                     placeholder="Ejm: 2312... ..."
@@ -242,21 +208,50 @@ export default function Login() {
                                 />
 
 
-                                <Button label="Registrarse" className="w-full py-2 border-round-md" severity="info" onClick={handleRegister} />
-                            </div>
+                                <Button type="submit" label="Registrarse" className="w-full py-2 border-round-md" severity="info" />
+                            </form>
 
                         </div>
-                    </div>
-                    <div className="toggleSection">
-                        <p>
-                            ¿Ya tienes una cuenta? Inicia sesión para acceder a la red pública del GAD Provincial de Santo Domingo.{" "}
-                            <span className="link" onClick={() => CdlgRegistro}>Ingresar</span>
-                        </p>
-                    </div>
+                    ) : (
+                        <div className="form" >
+                            <h2>Iniciar Sesión</h2>
+                            <form className="form-container" onSubmit={handleSubmit}>
+                                <InputText type="text" placeholder="Cédula"
+                                    value={inpCedula}
+                                    required
+                                    onChange={(e) => setInpCedula(e.target.value)}
+                                />
+                                <Button label="Ingresar" type="submit" className="w-full py-2 border-round-md" severity="info" />
+                            </form>
+                        </div>
+                    )}
                 </div>
+
+                {/* BOTÓN PARA CAMBIAR ENTRE LOGIN Y REGISTRO */}
+                <div className="toggleSection">
+                    <p>
+                        {isRegistering ? (
+                            <>
+                                ¿Ya tienes una cuenta? Inicia sesión para acceder a la red pública del GAD Provincial de Santo Domingo.{" "}
+                                <span className="link" onClick={() => setIsRegistering(false)}>Ingresar</span>
+                            </>
+                        ) : (
+                            <>
+                                ¿Es tu primera vez en la red pública del GAD Provincial de Santo Domingo?{" "}
+                                <span className="link" onClick={() => setIsRegistering(true)}>Registrate</span> para obtener acceso.
+                            </>
+                        )}
+                    </p>
+                </div>
+            </div>
+            <Dialog visible={dlgInformativo} onHide={() => setDlgInformativo(false)}
+                className="dlgInformativo" headerClassName="dlgheader"
+            >
+                <div className="container-informativo">
+                    <Image src="./artes/1.jpeg" className="" />
+                </div>
+
             </Dialog>
-
-
         </div>
     );
 }
