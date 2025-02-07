@@ -87,7 +87,6 @@ a {
 /* FORMULARIO */
 .formWrapper {
   width: 100%;
-  overflow-y: auto;
 }
 
 .link {
