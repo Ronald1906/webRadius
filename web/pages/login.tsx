@@ -148,7 +148,7 @@ export default function Login() {
     return (
         <div className="screen">
             <div className="containerCentered">
-                <Image src="./logov2.png" />
+                {isRegistering ? (<div></div>):(<Image src="./logov2.png" />)}
                 {/* FORMULARIOS CONDICIONALES */}
                 <div className="formWrapper">
                     {isRegistering ? (
