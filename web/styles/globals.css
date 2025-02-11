@@ -88,7 +88,6 @@ a {
 .formWrapper {
   width: 100%;
   overflow: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .link {
@@ -110,6 +109,7 @@ a {
   gap: 10px;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch;
 }
 
 

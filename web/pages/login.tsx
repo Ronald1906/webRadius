@@ -25,6 +25,10 @@ export default function Login() {
         { value: 'MASCULINO' }
     ]
 
+    document.addEventListener('touchmove', function (event) {
+        event.preventDefault();
+    }, { passive: false });
+
 
     useEffect(() => {
         const ga_srvr = searchParams.get("ga_srvr");
