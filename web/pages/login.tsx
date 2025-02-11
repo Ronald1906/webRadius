@@ -55,19 +55,6 @@ export default function Login() {
         setFormAction(url.toString()); // ✅ Actualizar la URL del formulario
     }, [searchParams]);
 
-    // const handleSubmit = (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     if (!formAction) return;
-
-    //     // ✅ Agregar usuario y contraseña a la URL antes de enviar
-    //     const finalUrl = new URL(formAction);
-    //     finalUrl.searchParams.set('ga_user', inpCedula);
-    //     finalUrl.searchParams.set('ga_pass', inpCedula);
-
-    //     // ✅ Redirigir al usuario a la URL de autenticación
-    //     window.location.replace(finalUrl.toString());
-    // };
-
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault(); // 📌 Bloquear la recarga de la página
@@ -77,21 +64,6 @@ export default function Login() {
         }
 
         try {
-            // ✅ Validar si el usuario tiene conexión activa
-            const validateResponse = await fetch("/api/auth/user/validate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: inpCedula }),
-            });
-
-            const validateData = await validateResponse.json();
-
-            if (validateResponse.status !== 200) {
-                // ❌ Si la validación falla, mostrar alerta con el error
-                alert(`Error: ${validateData.error}`);
-                return;
-            }
-
             // ✅ Si la validación fue exitosa, construir la URL y redirigir
             const finalUrl = new URL(formAction);
             finalUrl.searchParams.set("ga_user", inpCedula);
