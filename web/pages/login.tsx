@@ -25,9 +25,20 @@ export default function Login() {
         { value: 'MASCULINO' }
     ]
 
-    document.addEventListener('touchmove', function (event) {
-        event.preventDefault();
-    }, { passive: false });
+    useEffect(() => {
+        // Previene el "pull-to-refresh" en navegadores móviles
+        const preventPullToRefresh = (event: TouchEvent) => {
+            if (window.scrollY === 0 && event.touches[0].clientY > 50) {
+                event.preventDefault();
+            }
+        };
+
+        document.addEventListener('touchmove', preventPullToRefresh, { passive: false });
+
+        return () => {
+            document.removeEventListener('touchmove', preventPullToRefresh);
+        };
+    }, []);
 
 
     useEffect(() => {
@@ -152,7 +163,7 @@ export default function Login() {
     return (
         <div className="screen">
             <div className="containerCentered">
-                {isRegistering ? (<div></div>):(<Image src="./logov2.png" />)}
+                {isRegistering ? (<div></div>) : (<Image src="./logov2.png" />)}
                 {/* FORMULARIOS CONDICIONALES */}
                 <div className="formWrapper">
                     {isRegistering ? (
