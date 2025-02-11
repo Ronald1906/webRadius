@@ -64,13 +64,42 @@ export default function Login() {
         }
 
         try {
-            // ✅ Si la validación fue exitosa, construir la URL y redirigir
-            const finalUrl = new URL(formAction);
-            finalUrl.searchParams.set("ga_user", inpCedula);
-            finalUrl.searchParams.set("ga_pass", inpCedula);
+            // ✅ Validar si el usuario tiene conexión activa
+            const validateResponse = await fetch("/api/auth/user/validate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: inpCedula }),
+            });
 
-            // ✅ Redirigir al usuario a la URL de autenticación
-            window.location.replace(finalUrl.toString());
+
+            if (validateResponse.status === 404) {
+                alert('Parece que no estas registrado, registrate por favor')
+            }
+
+            if (validateResponse.status === 400) {
+                alert('Se produjo un error, intentalo de nuevo')
+                setInpCedula('')
+            }
+
+
+            if (validateResponse.status === 200) {
+
+
+                // ✅ Si la validación fue exitosa, construir la URL y redirigir
+                const finalUrl = new URL(formAction);
+                finalUrl.searchParams.set("ga_user", inpCedula);
+                finalUrl.searchParams.set("ga_pass", inpCedula);
+
+                // ✅ Redirigir al usuario a la URL de autenticación
+                window.location.replace(finalUrl.toString());
+
+            }
+
+
+            // ❌ Si la validación falla, mostrar alerta con el error
+            alert(`Al momento existe un inconveniente, lo solucionaremos lo mas pronto posible`);
+            return;
+
         } catch (error) {
             console.error("❌ Error al validar conexión:", error);
             alert("⚠️ No se pudo validar la conexión. Inténtelo más tarde.");
