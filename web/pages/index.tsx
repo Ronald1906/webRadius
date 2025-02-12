@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -87,4 +87,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Login;*/

@@ -74,17 +74,18 @@ export default function Login() {
 
             if (validateResponse.status === 404) {
                 alert('Parece que no estas registrado, registrate por favor')
+                setInpCedula('')
+                return
             }
 
             if (validateResponse.status === 400) {
                 alert('Se produjo un error, intentalo de nuevo')
                 setInpCedula('')
+                return
             }
 
 
             if (validateResponse.status === 200) {
-
-
                 // ✅ Si la validación fue exitosa, construir la URL y redirigir
                 const finalUrl = new URL(formAction);
                 finalUrl.searchParams.set("ga_user", inpCedula);
@@ -92,6 +93,8 @@ export default function Login() {
 
                 // ✅ Redirigir al usuario a la URL de autenticación
                 window.location.replace(finalUrl.toString());
+
+                return
 
             }
 
