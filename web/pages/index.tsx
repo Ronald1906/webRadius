@@ -88,3 +88,14 @@ const Login = () => {
 };
 
 export default Login;*/
+
+
+import React from 'react'
+
+function HomePage() {
+  return (
+    <div>HomePage</div>
+  )
+}
+
+export default HomePage
